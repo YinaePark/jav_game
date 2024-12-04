@@ -16,6 +16,7 @@ public class GameWindow extends JFrame {
     private Player player;
     private Farm farm;
     private Timer animationTimer;
+    private boolean[] keyState = new boolean[256];
     
     public GameWindow() {
         setTitle("Farming Game");
@@ -30,7 +31,7 @@ public class GameWindow extends JFrame {
         gamePanel = new GamePanel(playerRenderer, player, farm, registry);
 
         animationTimer = new Timer(1000/60, e -> {
-            playerRenderer.updateAnimation();
+            playerRenderer.update();
             gamePanel.repaint();
         });
         animationTimer.start();
@@ -39,31 +40,38 @@ public class GameWindow extends JFrame {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                switch(e.getKeyCode()) {
-                    case KeyEvent.VK_LEFT:
-                        playerRenderer.move(-7, 0);
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        playerRenderer.move(7, 0);
-                        break;
-                    case KeyEvent.VK_UP:
-                        playerRenderer.move(0, -7);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        playerRenderer.move(0, 7);
-                        break;
-                }
-                gamePanel.repaint();
+                keyState[e.getKeyCode()] = true;
             }
-
+            
             @Override
             public void keyReleased(KeyEvent e) {
-                playerRenderer.move(0, 0); // stop moving
+                keyState[e.getKeyCode()] = false;
             }
 
         });
+
+        Timer gameTimer = new Timer(16, e -> {  // 약 60FPS
+            updatePlayerMovement();
+            playerRenderer.update();
+            gamePanel.repaint();
+        });
+        gameTimer.start();
         
         add(gamePanel);
         setFocusable(true);
+    }
+
+    private void updatePlayerMovement() {
+        int dx = 0;
+        int dy = 0;
+        
+        if (keyState[KeyEvent.VK_A]) dx -= 1;
+        if (keyState[KeyEvent.VK_D]) dx += 1;
+        if (keyState[KeyEvent.VK_W]) dy -= 1;
+        if (keyState[KeyEvent.VK_S]) dy += 1;
+        
+        if (!playerRenderer.isMovingToTarget() && (dx != 0 || dy != 0)) {
+            playerRenderer.move(dx, dy);
+        }
     }
 }

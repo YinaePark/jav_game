@@ -22,8 +22,11 @@ public class GamePanel extends JPanel {
     private String selectedCrop = "tomato";
 
     private boolean isInteractable(int tileX, int tileY) {
-        int playerTileX = playerRenderer.getX() / TILE_SIZE;
-        int playerTileY = playerRenderer.getY() / TILE_SIZE;
+        int playerCenterX = playerRenderer.getX() + (playerRenderer.getSize() / 2);
+        int playerCenterY = playerRenderer.getY() + (playerRenderer.getSize() / 2);
+        
+        int playerTileX = playerCenterX / TILE_SIZE;
+        int playerTileY = playerCenterY / TILE_SIZE;
         
         return Math.abs(tileX - playerTileX) <= 1 && 
                Math.abs(tileY - playerTileY) <= 1;
@@ -99,10 +102,12 @@ public class GamePanel extends JPanel {
                 
                 // if crop is planted, draw the crop
                 if (tile.hasCrop()) {
-                    if (isInteractable(i, j)) {
-                        g.setColor(new Color(0, 100, 0));
-                    } else {
-                        g.setColor(new Color(0, 70, 0));   // dark green
+                    if (tile.getCrop().equals("tomato")) {
+                        g.setColor(Color.RED);
+                    } else if (tile.getCrop().equals("carrot")) {
+                        g.setColor(Color.ORANGE);
+                    } else if (tile.getCrop().equals("corn")) {
+                        g.setColor(Color.YELLOW);
                     }
                     g.fillOval(x + 10, y + 10, TILE_SIZE - 20, TILE_SIZE - 20);
                 }
