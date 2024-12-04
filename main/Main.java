@@ -3,13 +3,18 @@ package main;
 import java.util.Scanner;
 import core.CommandProcessor;
 import core.CommandRegistry;
+import domain.Farm;
+import domain.player.Player;
 
 
 public class Main {
     private static boolean isRunning = true;
 
     public static void main(String[] args) {
-        CommandRegistry registry = new CommandRegistry();
+
+        Player player = new Player(100);
+        Farm farm = new Farm();
+        CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
         CommandProcessor processor = new CommandProcessor(registry);
         Scanner scanner = new Scanner(System.in);
