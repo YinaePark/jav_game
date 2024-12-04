@@ -22,8 +22,8 @@ public class GamePanel extends JPanel {
     private String selectedCrop = "tomato";
 
     private boolean isInteractable(int tileX, int tileY) {
-        int playerCenterX = player.getX() + (player.getSize() / 2);
-        int playerCenterY = player.getY() + (player.getSize() / 2);
+        int playerCenterX = playerRenderer.getX() + (playerRenderer.getSize() / 2);
+        int playerCenterY = playerRenderer.getY() + (playerRenderer.getSize() / 2);
         
         int playerTileX = playerCenterX / TILE_SIZE;
         int playerTileY = playerCenterY / TILE_SIZE;
