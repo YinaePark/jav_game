@@ -7,7 +7,7 @@ public class HelpCommand implements Command {
         System.out.println("plant [crop]      - Plant a crop.");
         System.out.println("harvest [plot]    - Harvest a specific plot or all plots.");
         System.out.println("quit              - Exit the game.");
+        System.out.println("player            - Show current player stats.");
         // 추가 명령어 설명
     }
 }
-
