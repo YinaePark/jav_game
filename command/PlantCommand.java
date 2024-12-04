@@ -51,9 +51,9 @@ public class PlantCommand implements Command {
     private HarvestItem createCrop(String cropName) {
         switch (cropName.toLowerCase()) {
             case "potato":
-                return new HarvestItem("Potato", 10, 50); // 가격 10, 성장 시간 5
+                return new HarvestItem("Potato", 10, 500); // 가격 10, 성장 시간 5
             case "carrot":
-                return new HarvestItem("Carrot", 8, 40);  // 가격 8, 성장 시간 4
+                return new HarvestItem("Carrot", 8, 20);  // 가격 8, 성장 시간 4
             default:
                 return null; // 알 수 없는 작물 이름 처리
         }

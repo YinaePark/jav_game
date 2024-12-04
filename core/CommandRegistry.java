@@ -41,6 +41,7 @@ public class CommandRegistry {
         register("help", new HelpCommand());
         register("player", new PlayerCommand(player)); // PlayerCommand에 player 객체 전달
         register("farm", new FarmCommand(farm));
+        register("harvest", new HarvestCommand(player, farm));
         register("quit", args -> System.out.println("Exiting the game... Goodbye!"));
     }
 }
