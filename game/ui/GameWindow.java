@@ -4,13 +4,17 @@ import javax.swing.*;
 
 import core.CommandRegistry;
 
-import java.awt.*;
 import java.awt.event.*;
-import game.entity.Player;
+
+import domain.Farm;
+import domain.player.Player;
+import game.entity.PlayerRenderer;
 
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
+    private PlayerRenderer playerRenderer;
     private Player player;
+    private Farm farm;
     private Timer animationTimer;
     
     public GameWindow() {
@@ -19,13 +23,14 @@ public class GameWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
-        player = new Player(50, 50); // initial position
-        CommandRegistry registry = new CommandRegistry();
+        playerRenderer = new PlayerRenderer(50, 50); // initial position
+        farm = new Farm();
+        CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
-        gamePanel = new GamePanel(player, registry);
+        gamePanel = new GamePanel(playerRenderer, player, farm, registry);
 
         animationTimer = new Timer(1000/60, e -> {
-            player.updateAnimation();
+            playerRenderer.updateAnimation();
             gamePanel.repaint();
         });
         animationTimer.start();
@@ -36,16 +41,16 @@ public class GameWindow extends JFrame {
             public void keyPressed(KeyEvent e) {
                 switch(e.getKeyCode()) {
                     case KeyEvent.VK_LEFT:
-                        player.move(-7, 0);
+                        playerRenderer.move(-7, 0);
                         break;
                     case KeyEvent.VK_RIGHT:
-                        player.move(7, 0);
+                        playerRenderer.move(7, 0);
                         break;
                     case KeyEvent.VK_UP:
-                        player.move(0, -7);
+                        playerRenderer.move(0, -7);
                         break;
                     case KeyEvent.VK_DOWN:
-                        player.move(0, 7);
+                        playerRenderer.move(0, 7);
                         break;
                 }
                 gamePanel.repaint();
@@ -53,7 +58,7 @@ public class GameWindow extends JFrame {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                player.move(0, 0); // stop moving
+                playerRenderer.move(0, 0); // stop moving
             }
 
         });
