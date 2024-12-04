@@ -4,13 +4,17 @@ import javax.swing.*;
 
 import core.CommandRegistry;
 
-import java.awt.*;
 import java.awt.event.*;
-import game.entity.Player;
+
+import domain.Farm;
+import domain.player.Player;
+import game.entity.PlayerRenderer;
 
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
+    private PlayerRenderer playerRenderer;
     private Player player;
+    private Farm farm;
     private Timer animationTimer;
     private boolean[] keyState = new boolean[256];
     
@@ -20,13 +24,14 @@ public class GameWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
-        player = new Player(50, 50); // initial position
-        CommandRegistry registry = new CommandRegistry();
+        playerRenderer = new PlayerRenderer(50, 50); // initial position
+        farm = new Farm();
+        CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
-        gamePanel = new GamePanel(player, registry);
+        gamePanel = new GamePanel(playerRenderer, player, farm, registry);
 
         animationTimer = new Timer(1000/60, e -> {
-            player.update();
+            playerRenderer.update();
             gamePanel.repaint();
         });
         animationTimer.start();
@@ -47,7 +52,7 @@ public class GameWindow extends JFrame {
 
         Timer gameTimer = new Timer(16, e -> {  // 약 60FPS
             updatePlayerMovement();
-            player.update();
+            playerRenderer.update();
             gamePanel.repaint();
         });
         gameTimer.start();
@@ -65,8 +70,8 @@ public class GameWindow extends JFrame {
         if (keyState[KeyEvent.VK_W]) dy -= 1;
         if (keyState[KeyEvent.VK_S]) dy += 1;
         
-        if (!player.isMovingToTarget() && (dx != 0 || dy != 0)) {
-            player.move(dx, dy);
+        if (!playerRenderer.isMovingToTarget() && (dx != 0 || dy != 0)) {
+            playerRenderer.move(dx, dy);
         }
     }
 }

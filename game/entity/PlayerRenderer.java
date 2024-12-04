@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
-public class Player {
+public class PlayerRenderer {
     private int x, y;
     private static final int SIZE = 40;
     private BufferedImage spriteSheet;
@@ -29,7 +29,7 @@ public class Player {
         DOWN, UP, SIDE
     }
     
-    public Player(int x, int y) {
+    public PlayerRenderer(int x, int y) {
         this.x = x;
         this.y = y;
         this.targetX = x;

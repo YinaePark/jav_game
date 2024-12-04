@@ -3,13 +3,19 @@ package game.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import game.entity.Player;
+
+import domain.Farm;
+import domain.player.Player;
+import game.entity.PlayerRenderer;
 import game.tile.FarmTile;
 import command.*;
 import core.CommandRegistry;
 
 public class GamePanel extends JPanel {
+    private PlayerRenderer playerRenderer;
     private Player player;
+    private Farm farm;
+
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
     private CommandRegistry registry;
@@ -26,8 +32,10 @@ public class GamePanel extends JPanel {
                Math.abs(tileY - playerTileY) <= 1;
     }
     
-    public GamePanel(Player player, CommandRegistry registry) {
+    public GamePanel(PlayerRenderer playerRenderer, Player player, Farm farm, CommandRegistry registry) {
+        this.playerRenderer = playerRenderer;
         this.player = player;
+        this.farm = farm;
         this.registry = registry;
         setBackground(Color.GREEN.darker());
 
@@ -53,7 +61,7 @@ public class GamePanel extends JPanel {
                         if (e.getButton() == MouseEvent.BUTTON1) {
                             new TillCommand(tile).execute(new String[]{});
                         } else if (e.getButton() == MouseEvent.BUTTON3) {
-                            new PlantCommand(tile, selectedCrop).execute(new String[]{});
+                            new PlantCommand(player, farm, tile, selectedCrop).execute(new String[]{});
                         }
                         repaint();
                     } else {
@@ -107,6 +115,6 @@ public class GamePanel extends JPanel {
         }
         
         // draw player
-        player.draw(g);
+        playerRenderer.draw(g);
     }
 }
