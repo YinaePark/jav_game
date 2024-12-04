@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class NormalCustomer extends Customer {
     private static final int MAX_WAITING_MINUTES = 300;  // 5min
