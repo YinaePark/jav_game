@@ -11,6 +11,7 @@ import game.entity.Player;
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
     private Player player;
+    private Timer animationTimer;
     
     public GameWindow() {
         setTitle("Farming Game");
@@ -22,6 +23,12 @@ public class GameWindow extends JFrame {
         CommandRegistry registry = new CommandRegistry();
         registry.registerDefaults();
         gamePanel = new GamePanel(player, registry);
+
+        animationTimer = new Timer(1000/60, e -> {
+            player.updateAnimation();
+            gamePanel.repaint();
+        });
+        animationTimer.start();
         
         // add key listener
         addKeyListener(new KeyAdapter() {
@@ -29,20 +36,26 @@ public class GameWindow extends JFrame {
             public void keyPressed(KeyEvent e) {
                 switch(e.getKeyCode()) {
                     case KeyEvent.VK_LEFT:
-                        player.move(-5, 0);
+                        player.move(-7, 0);
                         break;
                     case KeyEvent.VK_RIGHT:
-                        player.move(5, 0);
+                        player.move(7, 0);
                         break;
                     case KeyEvent.VK_UP:
-                        player.move(0, -5);
+                        player.move(0, -7);
                         break;
                     case KeyEvent.VK_DOWN:
-                        player.move(0, 5);
+                        player.move(0, 7);
                         break;
                 }
                 gamePanel.repaint();
             }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                player.move(0, 0); // stop moving
+            }
+
         });
         
         add(gamePanel);

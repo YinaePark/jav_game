@@ -90,7 +90,6 @@ public class GamePanel extends JPanel {
                 }
                 
                 // if crop is planted, draw the crop
-                // 작물이 있는 경우
                 if (tile.hasCrop()) {
                     if (isInteractable(i, j)) {
                         g.setColor(new Color(0, 100, 0));
