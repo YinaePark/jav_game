@@ -20,6 +20,10 @@ public class Player {
     private Direction facing = Direction.DOWN;
     private boolean isMoving = false;
     private boolean facingLeft = true;
+    private double targetX;
+    private double targetY;
+    private static final double MOVEMENT_SPEED = 4.0;
+    private boolean isMovingToTarget = false;
 
     private enum Direction {
         DOWN, UP, SIDE
@@ -28,6 +32,8 @@ public class Player {
     public Player(int x, int y) {
         this.x = x;
         this.y = y;
+        this.targetX = x;
+        this.targetY = y;
         loadSprites();
     }
 
@@ -65,6 +71,20 @@ public class Player {
     public void move(int dx, int dy) {
         if (dx != 0 || dy != 0) {
             isMoving = true;
+
+            int currentTileX = x / SIZE;
+            int currentTileY = y / SIZE;
+
+            int nextTileX = currentTileX + (dx > 0 ? 1 : dx < 0 ? -1 : 0);
+            int nextTileY = currentTileY + (dy > 0 ? 1 : dy < 0 ? -1 : 0);
+
+            targetX = nextTileX * SIZE + (SIZE - this.SIZE) / 2;
+            targetY = nextTileY * SIZE + (SIZE - this.SIZE) / 2;
+
+            targetX = Math.max(0, Math.min(targetX, 800 - SIZE));
+            targetY = Math.max(0, Math.min(targetY, 600 - SIZE));
+
+            isMovingToTarget = true;
             
             // set facing direction
             if (Math.abs(dx) > Math.abs(dy)) {
@@ -73,16 +93,29 @@ public class Player {
             } else {
                 facing = dy > 0 ? Direction.DOWN : Direction.UP;
             }
-        } else {
-            isMoving = false;
+        }
+    }
+
+    public void update() {
+        if (isMovingToTarget) {
+            double dx = targetX - x;
+            double dy = targetY - y;
+            double distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < MOVEMENT_SPEED) {
+                x = (int) targetX;
+                y = (int) targetY;
+                isMovingToTarget = false;
+                isMoving = false;
+            } else {
+                double moveX = (dx / distance) * MOVEMENT_SPEED;
+                double moveY = (dy / distance) * MOVEMENT_SPEED;
+                x += (int) moveX;
+                y += (int) moveY;
+            }
         }
         
-        x += dx;
-        y += dy;
-        
-        // 경계 충돌 처리
-        x = Math.max(0, Math.min(x, 800 - SIZE));
-        y = Math.max(0, Math.min(y, 600 - SIZE));
+        updateAnimation();
     }
     
     public void updateAnimation() {
@@ -130,4 +163,6 @@ public class Player {
 
     public int getX() { return x; }
     public int getY() { return y; }
+    public int getSize() { return SIZE; }
+    public boolean isMovingToTarget() { return isMovingToTarget; }
 }
