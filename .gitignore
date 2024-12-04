@@ -1,0 +1,69 @@
+# Java class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Logs and temporary files
+*.log
+*.tmp
+*.out
+*.pid
+
+# Compiled output
+/build/
+/out/
+target/
+
+# IDE specific files
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.ipr
+*.iws
+
+### Eclipse ###
+.project
+.classpath
+.settings/
+
+### VS Code ###
+.vscode/
+
+# Operating system specific files
+.DS_Store
+Thumbs.db
+
+# Maven specific
+/.mvn/
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle specific
+.gradle/
+build/
+!gradle-wrapper.jar
+.gradle-cache/
+.gradle-build-cache/
+*.gradle
+
+# Node (if using Node.js tooling in the project)
+node_modules/
+
+# Environment-specific files
+.env
+.env.local
+.env.production
+.env.test
+
+# Temporary or backup files
+*.bak
+*.swp
+*.swo
+*~
