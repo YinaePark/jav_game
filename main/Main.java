@@ -1,6 +1,5 @@
 package main;
 
-
 import java.util.Scanner;
 import core.CommandProcessor;
 import core.CommandRegistry;
