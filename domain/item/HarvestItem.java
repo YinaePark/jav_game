@@ -1,39 +1,39 @@
 package domain.item;
 
 public class HarvestItem extends Item implements Growable, Sellable {
-    private double price;
-    private int growthTime;
-    private int timeElapsed; // 경과 시간
-    private boolean isHarvested;
+    private double price; // 판매 가격
+    private int growthTime; // 총 성장 시간 (시간 단위)
+    private long plantedTimestamp; // 심은 시점의 타임스탬프 (밀리초 단위)
+    private boolean isHarvested; // 수확 여부
 
     public HarvestItem(String name, double price, int growthTime) {
         super(name);
         this.price = price;
         this.growthTime = growthTime;
-        this.timeElapsed = 0;
+        this.plantedTimestamp = -1; // 초기값: 아직 심어지지 않음
         this.isHarvested = false;
     }
 
     // Growable 인터페이스 구현
     @Override
     public void plant() {
-        System.out.println(name + " has been planted.");
-        this.timeElapsed = 0;
-        this.isHarvested = false;
+        System.out.println(getName() + " has been planted.");
+        this.plantedTimestamp = System.currentTimeMillis(); // 심는 시점 기록
+        this.isHarvested = false; // 심은 상태로 설정
     }
 
     @Override
     public boolean isReadyToHarvest() {
-        return this.timeElapsed >= this.growthTime;
+        return getTimeElapsed() >= this.growthTime; // 경과 시간이 성장 시간 이상인지 확인
     }
 
     @Override
     public void harvest() {
         if (isReadyToHarvest()) {
-            System.out.println(name + " is ready to harvest.");
-            this.isHarvested = true;
+            System.out.println(getName() + " has been harvested.");
+            this.isHarvested = true; // 수확 완료 상태로 설정
         } else {
-            System.out.println(name + " is not ready to harvest yet.");
+            System.out.println(getName() + " is not ready to harvest yet.");
         }
     }
 
@@ -48,19 +48,43 @@ public class HarvestItem extends Item implements Growable, Sellable {
         return price;
     }
 
-    // Vegetable을 요리에 사용
     @Override
     public void useInDish() {
         if (isHarvested) {
-            System.out.println(name + " is used in the dish.");
+            System.out.println(getName() + " is used in the dish.");
         } else {
-            System.out.println(name + " cannot be used, it needs to be harvested first.");
+            System.out.println(getName() + " cannot be used, it needs to be harvested first.");
         }
     }
 
-    // 경과 시간 추가
-    public void passTime(int hours) {
-        this.timeElapsed += hours;
+    // 심은 이후 경과 시간을 반환
+    private int getTimeElapsed() {
+        if (plantedTimestamp == -1 || isHarvested) {
+            return 0; // 아직 심지 않았거나 수확 후에는 성장 멈춤
+        }
+        long currentTime = System.currentTimeMillis();
+        long elapsedMillis = currentTime - plantedTimestamp;
+        return (int) (elapsedMillis / 1000); // 시간 단위로 변환
     }
 
+    // 성장 진행 상태 반환
+    public int getGrowthProgress() {
+        int elapsed = getTimeElapsed();
+        System.out.println("테스트 : elapsted : "+elapsed);
+        System.out.println("growthTime : "+this.growthTime);
+        System.out.println("타임스탬프?? : "+this.plantedTimestamp);
+        System.out.println("현재시간?? : "+System.currentTimeMillis());
+        System.out.println("경과한시간?? : "+(System.currentTimeMillis() - plantedTimestamp));
+
+//        currentTime - plantedTimestamp;
+//        return (int) (elapsedMillis / (1000 * 60 * 60))
+        return (int) ((double) elapsed / this.growthTime * 100);
+    }
+
+    // 디버깅 또는 상태 확인용
+    public void printStatus() {
+        System.out.println("Name: " + getName());
+        System.out.println("Growth Progress: " + getGrowthProgress() + "%");
+        System.out.println("Ready to Harvest: " + isReadyToHarvest());
+    }
 }

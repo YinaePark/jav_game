@@ -1,5 +1,6 @@
 package domain.player;
 
+import domain.item.HarvestItem;
 import domain.item.Item;
 
 import java.util.ArrayList;
@@ -80,16 +81,27 @@ public class Player {
         System.out.println("Dish sold for 100 money!");
     }
 
-    // 농작물 심기: 농작물을 심을 때 돈이 차감될 수 있음 (예: 심는 데 10 돈)
-    public boolean plantCrop(Item cropItem, double plantingCost) {
+    // 농작물 심기: 단지 농장에 심는 작업만 수행
+    public boolean plantCrop(HarvestItem cropItem, double plantingCost) {
         if (spendMoney(plantingCost)) {
-            addItem(cropItem);  // 농작물이 인벤토리에 추가
             System.out.println("Planted " + cropItem.getName() + "!");
             return true;
         }
         return false;
     }
+    // 농작물 수확: 수확 가능한 경우 인벤토리에 추가
+    public void harvestCrop(HarvestItem cropItem) {
+        if (!cropItem.isReadyToHarvest()) {
+            System.out.println(cropItem.getName() + " is not ready to harvest yet.");
+            return;
+        }
 
+        if (addItem(cropItem)) {
+            System.out.println("Harvested " + cropItem.getName() + " and added it to your inventory!");
+        } else {
+            System.out.println("Failed to harvest. Inventory is full.");
+        }
+    }
     // 인벤토리 상태 출력
     public void printInventory() {
         System.out.println("Inventory: ");

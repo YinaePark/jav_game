@@ -40,6 +40,7 @@ public class CommandRegistry {
         register("plant", new PlantCommand(player, farm, null, null));
         register("help", new HelpCommand());
         register("player", new PlayerCommand(player)); // PlayerCommand에 player 객체 전달
+        register("farm", new FarmCommand(farm));
         register("quit", args -> System.out.println("Exiting the game... Goodbye!"));
     }
 }
