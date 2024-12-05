@@ -34,9 +34,16 @@ public class IngredientSelectionDialog extends JDialog {
         ingredientSlotsPanel = new JPanel(new GridLayout(1, MAX_INGREDIENTS));
         for (int i = 0; i < MAX_INGREDIENTS; i++) {
             final int index = i;
-            JButton slotButton = new JButton("Slot " + (i + 1));
-            slotButton.addActionListener(e -> openIngredientSelectionDialog(index));
-            ingredientSlotsPanel.add(slotButton);
+            JLabel slotLabel = new JLabel("Slot " + (i + 1));
+            slotLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));  // 슬롯에 테두리 추가
+            slotLabel.setPreferredSize(new Dimension(80, 80));  // 슬롯 크기 설정
+            slotLabel.setHorizontalAlignment(SwingConstants.CENTER);  // 텍스트 및 아이콘 중앙 정렬
+            slotLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    openIngredientSelectionDialog(index);
+                }
+            });
+            ingredientSlotsPanel.add(slotLabel);
         }
         add(ingredientSlotsPanel, BorderLayout.SOUTH);
 
@@ -53,15 +60,37 @@ public class IngredientSelectionDialog extends JDialog {
         setLocationRelativeTo(null);  // 창 가운데에 띄우기
     }
 
+    private void updateIngredientSlot(int slotIndex, Item selectedItem) {
+        // 기존 JLabel에 아이템의 아이콘과 이름을 표시
+        JLabel slotLabel = (JLabel) ingredientSlotsPanel.getComponent(slotIndex);
+        slotLabel.setIcon(new ImageIcon(selectedItem.getSprite(50, 50)));  // 50x50 크기의 아이템 이미지
+        slotLabel.setText(selectedItem.getName());  // 아이템 이름
+        slotLabel.setHorizontalTextPosition(SwingConstants.CENTER);  // 텍스트 중앙 정렬
+        slotLabel.setVerticalTextPosition(SwingConstants.BOTTOM);  // 텍스트 아래쪽에 표시
+        slotLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));  // 테두리 추가
+    }
+
     private void openIngredientSelectionDialog(int slotIndex) {
         Item selectedItem = inventoryPanel.getSelectedItem();
         if (selectedItem != null) {
-            selectedIngredients[slotIndex] = selectedItem; // 재료 슬롯에 아이템 채우기
+            // 재료 슬롯에 아이템 채우기
+            selectedIngredients[slotIndex] = selectedItem;
+            // 아이템을 인벤토리에서 삭제
+            player.removeItem(selectedItem.getName());
+
+            // 재료 슬롯에 아이템 아이콘과 이름을 표시
+            updateIngredientSlot(slotIndex, selectedItem);
+
+            // 인벤토리 업데이트
+            inventoryPanel.updateInventory(player.getInventory());
+
             JOptionPane.showMessageDialog(this, "Selected " + selectedItem.getName() + " for Slot " + (slotIndex + 1));
         } else {
             JOptionPane.showMessageDialog(this, "No item selected.");
         }
     }
+
+
 
 
     public void addSubmitListener(ActionListener listener) {
