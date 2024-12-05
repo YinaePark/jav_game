@@ -1,34 +1,41 @@
 package game.tile;
 
+import domain.item.HarvestItem;
+
 public class FarmTile {
     private boolean tilled = false;  // tilled or not
-    private String crop = null;      // crop type
-    private int growthStage = 0;     // growth stage
+    private HarvestItem crop;
+
+    public FarmTile() {
+        this.tilled = false;
+        this.crop = null;
+    }
 
     public boolean isTilled() {
         return tilled;
     }
 
-    public void till() {
-        this.tilled = true;
+    public void setTilled(boolean tilled) {
+        this.tilled = tilled;
     }
 
     public boolean hasCrop() {
         return crop != null;
     }
 
-    public void plant(String cropType) {
-        if (tilled && !hasCrop()) {
-            this.crop = cropType;
-            this.growthStage = 0;
-        }
+    public String getCropName() {
+        return crop != null ? crop.getName() : null;
     }
 
-    public String getCrop() {
+    public HarvestItem getCrop() {
         return crop;
     }
 
-    public int getGrowthStage() {
-        return growthStage;
+    public void setCrop(HarvestItem crop) {
+        this.crop = crop;
+    }
+
+    public int getGrowthProgress() {
+        return crop != null ? crop.getGrowthProgress() : 0;
     }
 }

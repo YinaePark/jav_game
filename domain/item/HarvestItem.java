@@ -70,7 +70,7 @@ public class HarvestItem extends Item implements Growable, Sellable {
     // 성장 진행 상태 반환
     public int getGrowthProgress() {
         int elapsed = getTimeElapsed();
-        System.out.println("growthTime : "+this.growthTime);
+        // System.out.println("growthTime : "+this.growthTime);
         return (int) ((double) elapsed / this.growthTime * 100);
     }
 

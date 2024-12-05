@@ -36,6 +36,10 @@ public class Player {
         return money;
     }
 
+    public List<Item> getInventory() {
+        return new ArrayList<>(inventory);
+    }
+
     // 아이템을 인벤토리에 추가 (인벤토리 최대 개수 체크)
     public boolean addItem(Item item) {
         if (inventory.size() >= MAX_INVENTORY_SIZE) {
@@ -90,16 +94,18 @@ public class Player {
         return false;
     }
     // 농작물 수확: 수확 가능한 경우 인벤토리에 추가
-    public void harvestCrop(HarvestItem cropItem) {
+    public boolean harvestCrop(HarvestItem cropItem) {
         if (!cropItem.isReadyToHarvest()) {
             System.out.println(cropItem.getName() + " is not ready to harvest yet.");
-            return;
+            return false;
         }
 
         if (addItem(cropItem)) {
             System.out.println("Harvested " + cropItem.getName() + " and added it to your inventory!");
+            return true;
         } else {
             System.out.println("Failed to harvest. Inventory is full.");
+            return false;
         }
     }
     // 인벤토리 상태 출력

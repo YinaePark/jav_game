@@ -1,9 +1,5 @@
 package core;
 
-import command.Command;
-import command.HelpCommand;
-import command.PlantCommand;
-import command.TillCommand;
 import command.*;
 import domain.Farm;
 import domain.player.Player;
@@ -41,7 +37,10 @@ public class CommandRegistry {
         register("help", new HelpCommand());
         register("player", new PlayerCommand(player)); // PlayerCommand에 player 객체 전달
         register("farm", new FarmCommand(farm));
-        register("harvest", new HarvestCommand(player, farm));
-        register("quit", args -> System.out.println("Exiting the game... Goodbye!"));
+        register("harvest", new HarvestCommand(player, farm, null, null, null));
+        register("quit", exit -> {
+            System.out.println("Exiting game... Goodbye!");
+            System.exit(0);
+        });
     }
 }
