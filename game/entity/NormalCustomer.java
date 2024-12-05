@@ -96,7 +96,7 @@ public class NormalCustomer extends Customer {
     }
 
     @Override
-    protected void updateSatisfaction(List<String> ingredients) {
+    public void updateSatisfaction(List<String> ingredients) {
         // RecipeManager에서 레시피의 상세 정보 가져오기
         RecipeManager recipeManager = RecipeManager.getInstance();
 
@@ -132,7 +132,7 @@ public class NormalCustomer extends Customer {
     }
 
     @Override
-    protected int calculateReward() {
+    public int calculateReward() {
         // RecipeManager에서 레시피의 상세 정보 가져오기
         RecipeManager recipeManager = RecipeManager.getInstance();
         String menu = orderedMenus.get(0);

@@ -6,6 +6,7 @@ import domain.Farm;
 import domain.item.Item;
 import domain.player.Player;
 import game.entity.Customer;
+import game.entity.NormalCustomer;
 import game.entity.PlayerRenderer;
 import game.recipe.Recipe;
 import game.recipe.RecipeManager;
@@ -17,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -377,7 +377,6 @@ public class GamePanel extends JPanel {
         if (customer == null) {
             return; // 고객이 없다면 처리 종료
         }
-
         // 2. 요리 선택 다이얼로그 표시
         showDishSelectionDialog(customer);
     }
@@ -391,14 +390,13 @@ public class GamePanel extends JPanel {
         return null; // 클릭된 위치에 고객이 없을 경우
     }
 
-
     private void showDishSelectionDialog(Customer customer) {
         List<Recipe> customerRecipes = customer.getAssignedRecipes();
 
-        // ChoiceDishPanel 생성
+        // ChoiceDishPanel 생성 
         JPanel panel = new JPanel(new BorderLayout());
         ChoiceDishPanel choiceDishPanel = new ChoiceDishPanel(customerRecipes, selectedDish -> {
-//            serveDishToCustomer(selectedDish, customer); // 요리 제공 처리
+            serveDishToCustomer(selectedDish, customer);
             ((JDialog) SwingUtilities.getWindowAncestor(panel)).dispose(); // 다이얼로그 닫기
         });
 
@@ -412,5 +410,39 @@ public class GamePanel extends JPanel {
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
+
+    // 플레이어의 인벤토리에서 사용할 수 있는 재료를 가져오는 메서드
+    private List<String> getPlayerIngredients() {
+        List<String> playerIngredients = new ArrayList<>();
+        // 플레이어의 인벤토리에서 재료 목록을 추가
+        for (Item item : player.getInventory()) {
+            playerIngredients.add(item.getName());
+
+        }
+        return playerIngredients;
+    }
+
+
+    private void serveDishToCustomer(String selectedDish, Customer customer) {
+        // 선택한 레시피에 대해 재료 선택 다이얼로그 띄우기
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        Recipe selectedRecipe = recipeManager.getRecipe(selectedDish);
+        if (selectedRecipe == null) {
+            // 해당 이름에 맞는 레시피가 없을 경우 처리
+            System.out.println("Error: Recipe not found for " + selectedDish);
+            return;
+        }
+        showIngredientSelectionDialog(selectedRecipe, customer);
+    }
+
+    private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
+        // IngredientSelectionDialog 생성 (Player와 연결)
+        IngredientSelectionDialog ingredientSelectionDialog = new IngredientSelectionDialog(gameWindow, player, (NormalCustomer) customer);
+
+        // 다이얼로그 표시
+        ingredientSelectionDialog.setVisible(true);
+
+    }
+
 
 }

@@ -64,8 +64,8 @@ public abstract class Customer {
     // abstract methods
     protected abstract void loadSprites();  // load sprites for customer
     protected abstract void initializeCustomer();
-    protected abstract void updateSatisfaction(List<String> ingredients);
-    protected abstract int calculateReward();
+    public abstract void updateSatisfaction(List<String> ingredients);
+    public abstract int calculateReward();
     
     public void update() {
         if (isWaiting) {
