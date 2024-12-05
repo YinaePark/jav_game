@@ -32,6 +32,7 @@ public class ChoiceDishPanel extends JPanel {
 
         // 아이콘 추가
         JLabel iconLabel = new JLabel();
+        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
         Image image = recipe.getSprite(50, 50); // 아이콘 크기 조정
         if (image != null) {
@@ -39,12 +40,15 @@ public class ChoiceDishPanel extends JPanel {
         } else {
             iconLabel.setText("No Image");
         }
+        dishPanel.add(Box.createVerticalStrut(10));
         dishPanel.add(iconLabel);
 
         // 이름 추가
         JLabel dishNameLabel = new JLabel(recipe.getName());
-        dishNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         dishNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dishNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        dishPanel.add(Box.createVerticalStrut(5));
+        //dishNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         dishPanel.add(dishNameLabel);
 
         // 버튼 추가
@@ -54,7 +58,7 @@ public class ChoiceDishPanel extends JPanel {
         dishButton.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         dishButton.setFocusPainted(false);
         dishButton.addActionListener(e -> onDishSelected.accept(recipe.getName()));
-        dishPanel.add(Box.createVerticalStrut(5)); // 버튼과 이름 사이 여백
+        dishPanel.add(Box.createVerticalStrut(10)); // 버튼과 이름 사이 여백
         dishPanel.add(dishButton);
 
         return dishPanel;
