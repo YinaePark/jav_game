@@ -88,7 +88,9 @@ public class ShopPanel extends JPanel {
                                 if (quantity > 0 && player.getMoney() >= selectedItem.getPrice() * quantity) {
                                     // 상품 구매
                                     player.spendMoney(selectedItem.getPrice() * quantity);
-                                    player.addItem(selectedItem);
+                                    for (int q = 0; q < quantity; q++) {
+                                        player.addItem(selectedItem);  // 수량만큼 아이템 추가
+                                    }
                                     JOptionPane.showMessageDialog(ShopPanel.this, "Purchased " + quantity + " " + selectedItem.getName());
                                 } else {
                                     JOptionPane.showMessageDialog(ShopPanel.this, "Insufficient funds or invalid quantity", "Error", JOptionPane.ERROR_MESSAGE);

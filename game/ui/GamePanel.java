@@ -442,54 +442,7 @@ public class GamePanel extends JPanel {
         // 다이얼로그 표시
         ingredientSelectionDialog.setVisible(true);
 
-        // 제출 버튼 클릭 후 선택된 재료를 가져와서 처리
-        ingredientSelectionDialog.addSubmitListener(e -> {
-            // 선택된 재료 목록을 받아오기
-            List<String> selectedIngredients = new ArrayList<>();
-            for (int i = 0; i < IngredientSelectionDialog.MAX_INGREDIENTS; i++) {
-                Item ingredient = ingredientSelectionDialog.getSelectedIngredient(i);
-                if (ingredient != null) {
-                    selectedIngredients.add(ingredient.getName());
-                }
-            }
-
-            // 선택된 재료 확인 후, Dish를 평가하고 서버
-            evaluateAndServeDish(selectedIngredients, selectedDish, customer);
-        });
     }
 
-    private void evaluateAndServeDish(List<String> selectedIngredients, Recipe selectedRecipe, Customer customer) {
-        // 1. 재료가 모두 있는지 확인
-        List<String> requiredIngredients = selectedRecipe.getIngredients();
-        boolean hasAllIngredients = true;
-
-        // 필요 재료와 선택한 재료 비교
-        for (String ingredient : requiredIngredients) {
-            if (!selectedIngredients.contains(ingredient)) {
-                hasAllIngredients = false;
-                break;
-            }
-        }
-
-        // 2. 재료가 모두 있는 경우, 요리를 제공하고 보상 지급
-        if (hasAllIngredients) {
-            customer.updateSatisfaction(selectedIngredients);
-            int reward = customer.calculateReward();
-            player.earnMoney(reward);
-
-            // 보상 다이얼로그 표시
-            JOptionPane.showMessageDialog(this,
-                    String.format("Dish Served! Satisfaction Level: %d\nReward: € %d",
-                            customer.getSatisfactionLevel(), reward),
-                    "Dish Serving Result",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            // 재료가 부족한 경우
-            JOptionPane.showMessageDialog(this,
-                    "You do not have all the required ingredients!",
-                    "Missing Ingredients",
-                    JOptionPane.WARNING_MESSAGE);
-        }
-    }
 
 }
