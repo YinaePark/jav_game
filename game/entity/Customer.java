@@ -20,14 +20,16 @@ public abstract class Customer {
     protected Direction facing = Direction.DOWN;
     protected boolean facingLeft = true;
     protected boolean isMoving = false;
-    
+    protected long spawnTime;  // 고객이 생성된 시간
+
     protected List<String> orderedMenus;  // menu list
     protected int satisfactionLevel;      // satisfaction level(0~5)
     protected int maxWaitingTime;         // maximum waiting time
     protected int currentWaitingTime;     // current waiting time
     public boolean isWaitingTooLong() {
-        return false;
+        return currentWaitingTime >= maxWaitingTime;
     }
+
     public boolean isOrderComplete() {
         return false;
     }
@@ -40,6 +42,7 @@ public abstract class Customer {
     public Customer(int x, int y) {
         this.x = x;
         this.y = y;
+        this.spawnTime = System.currentTimeMillis();  // 고객이 생성된 시간
         this.assignedRecipes = null; // 초기에는 null
         this.satisfactionLevel = 5;  // initial satisfaction level
         loadSprites();
