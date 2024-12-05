@@ -12,41 +12,57 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.Random;
+
 public class NormalCustomer extends Customer {
     private static final int MAX_WAITING_MINUTES = 300;  // 5min
     private static final int BASE_REWARD = 100;         // base reward
     private static final double SATISFACTION_MULTIPLIER = 1.2; // satisfaction multiplier
     
+    private Image[] customerImages; //5개의 손님 이미지 배열
+    private Image currentImage;
+    private Random random = new Random();
+
+    private BufferedImage spriteSheet;
+    private BufferedImage[] frontSprites;
+    private BufferedImage[] backSprites;
+    private BufferedImage[] sideSprites;
+
     public NormalCustomer(int x, int y) {
         super(x, y);
+        initializeCustomer(); 
+        loadSprites();
     }
     
     @Override
     protected void loadSprites() {
         try {
-            File file = new File("sprites/player/normal_customer.png");
+            String spritePath = "sprites/player/" + getCustomerSpriteFileName();
+            File file = new File(spritePath);
             if (file.exists()) {
                 spriteSheet = ImageIO.read(file);
                 int frameWidth = spriteSheet.getWidth() / 3;  // 3 columns
-                int frameHeight = spriteSheet.getHeight() / 4; // 4 rows
+                int frameHeight = spriteSheet.getHeight() / 3; // 3 rows
                 
                 // initialize sprite arrays
-                frontSprites = new BufferedImage[4];
-                backSprites = new BufferedImage[4];
-                sideSprites = new BufferedImage[4];
+                frontSprites = new BufferedImage[3];
+                backSprites = new BufferedImage[3];
+                sideSprites = new BufferedImage[3];
                 
                 // Load front animations
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 3; i++) {
                     frontSprites[i] = spriteSheet.getSubimage(0, i * frameHeight, frameWidth, frameHeight);
                 }
                 
                 // Load back animations
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 3; i++) {
                     backSprites[i] = spriteSheet.getSubimage(frameWidth, i * frameHeight, frameWidth, frameHeight);
                 }
                 
                 // Load side animations
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 3; i++) {
                     sideSprites[i] = spriteSheet.getSubimage(frameWidth * 2, i * frameHeight, frameWidth, frameHeight);
                 }
             }
@@ -55,12 +71,40 @@ public class NormalCustomer extends Customer {
             spriteSheet = null;
         }
     }
-    
+
+    private String getCustomerSpriteFileName() {
+        // customer 이미지를 기반으로 스프라이트 시트 이름을 결정
+        if (currentImage.equals(customerImages[0])) {
+            return "customer1_sprite.png";  // customer1 스프라이트 시트
+        } else if (currentImage.equals(customerImages[1])) {
+            return "customer2_sprite.png";  // customer2 스프라이트 시트
+        } else if (currentImage.equals(customerImages[2])) {
+            return "customer3_sprite.png";  // customer3 스프라이트 시트
+        } else if (currentImage.equals(customerImages[3])) {
+            return "customer4_sprite.png";  // customer4 스프라이트 시트
+        } else {
+            return "customer5_sprite.png";  // customer5 스프라이트 시트
+        }
+    }
+
     @Override
     protected void initializeCustomer() {
         this.maxWaitingTime = MAX_WAITING_MINUTES;
         this.currentWaitingTime = 0;
         this.satisfactionLevel = 5;
+        
+        //손님 이미지 파일 경로 배열에 저장
+        customerImages = new Image [5];
+        customerImages[0] = new ImageIcon("sprites/player/customer1.png").getImage();
+        customerImages[1] = new ImageIcon("sprites/player/customer2.png").getImage();
+        customerImages[2] = new ImageIcon("sprites/player/customer3.png").getImage();
+        customerImages[3] = new ImageIcon("sprites/player/customer4.png").getImage();
+        customerImages[4] = new ImageIcon("sprites/player/customer5.png").getImage();
+    
+        // 랜덤하게 하나의 이미지 선택
+        currentImage = customerImages[random.nextInt(customerImages.length)];
+
+        loadSprites();
         
         // choose 3 random menus
         Random random = new Random();
