@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientSelectionDialog extends JDialog {
+public class IngredientSelectionPanel extends JDialog {
     public static final int MAX_INGREDIENTS = 5;  // 최대 재료 개수
     private InventoryPanel inventoryPanel;
     private Player player;
@@ -18,7 +18,7 @@ public class IngredientSelectionDialog extends JDialog {
     private ActionListener submitListener;
     private NormalCustomer normalCustomer;
 
-    public IngredientSelectionDialog(Frame owner, Player player,NormalCustomer normalCustomer) {
+    public IngredientSelectionPanel(Frame owner, Player player, NormalCustomer normalCustomer) {
         super(owner, "Select Ingredients", true);  // Modal로 띄운다.
         this.player = player;
         this.normalCustomer = normalCustomer;

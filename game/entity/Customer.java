@@ -32,6 +32,7 @@ public abstract class Customer {
         return currentWaitingTime >= maxWaitingTime;
     }
 
+
     public boolean isOrderComplete() {
         return false;
     }
@@ -74,7 +75,7 @@ public abstract class Customer {
     protected abstract void initializeCustomer();
     public abstract void updateSatisfaction(List<String> ingredients);
     public abstract int calculateReward();
-    
+
     public void update() {
         if (isWaiting) {
             currentWaitingTime = (int)(System.currentTimeMillis() - spawnTime);
@@ -84,7 +85,7 @@ public abstract class Customer {
         }
         updateAnimation();
     }
-    
+
     protected void updateAnimation() {
         if (isMoving) {
             animationDelay++;
@@ -96,11 +97,11 @@ public abstract class Customer {
             currentFrame = 0;  // idle frame
         }
     }
-    
+
     public void draw(Graphics g) {
         if (spriteSheet != null) {
             BufferedImage currentSprite = null;
-            
+
             // determine which sprite to draw
             switch (facing) {
                 case DOWN:
@@ -113,7 +114,7 @@ public abstract class Customer {
                     currentSprite = sideSprites[currentFrame];
                     break;
             }
-            
+
             if (currentSprite != null) {
                 if (facing == Direction.SIDE && facingLeft) {
                     // flip sprite horizontally
@@ -149,17 +150,17 @@ public abstract class Customer {
             satisfactionLevel--;
         }
     }
-    
+
     public int evaluateFood(String menu, List<String> ingredients) {
         if (!orderedMenus.contains(menu)) {
             return -1;
         }
-        
+
         updateSatisfaction(ingredients);
-        
+
         return calculateReward();
     }
-    
+
     // Getter/Setter
     public List<String> getOrderedMenus() { return orderedMenus; }
     public int getSatisfactionLevel() { return satisfactionLevel; }
