@@ -2,6 +2,8 @@ package game.ui;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,6 +21,9 @@ public class GameWindow extends JFrame {
     private Player player;
     private Farm farm;
     private boolean[] keyState = new boolean[256];
+    private InventoryPanel inventoryPanel;
+    private JPanel mainContainer;
+    private boolean isInventoryVisible = false;
     
     private List<Customer> customers;
     private static final int CUSTOMER_SPAWN_Y = 600;
@@ -27,9 +32,9 @@ public class GameWindow extends JFrame {
     
     public GameWindow() {
         setTitle("Farming Game");
-        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setResizable(false);
+        mainContainer = new JPanel(new BorderLayout());
         
         customers = new ArrayList<>();
         
@@ -38,13 +43,42 @@ public class GameWindow extends JFrame {
         farm = new Farm();
         CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
+    
         gamePanel = new GamePanel(playerRenderer, player, farm, registry, customers);
-
+        gamePanel.setGameWindow(this);
+        mainContainer.add(gamePanel, BorderLayout.CENTER);
+    
+        inventoryPanel = new InventoryPanel(player, gamePanel);
+        inventoryPanel.setPreferredSize(new Dimension(300, 600));  // 고정된 높이 설정
+        inventoryPanel.setVisible(false);
+        mainContainer.add(inventoryPanel, BorderLayout.EAST);
+    
+        setContentPane(mainContainer);
+        
         setupTimers();
         setupKeyListener();
         
-        add(gamePanel);
-        setFocusable(true);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+    }
+
+    public void updateInventoryIfNeeded() {
+        if (isInventoryVisible && inventoryPanel != null) {
+            inventoryPanel.updateInventory();
+            inventoryPanel.repaint();
+        }
+    }
+    
+    private void toggleInventory() {
+        isInventoryVisible = !isInventoryVisible;
+        inventoryPanel.setVisible(isInventoryVisible);
+        if (isInventoryVisible) {
+            setSize(1100, 600);  // 인벤토리가 보일 때 크기
+            inventoryPanel.updateInventory();
+        } else {
+            setSize(800, 600);  // 인벤토리가 숨겨질 때 크기
+        }
+        gamePanel.requestFocus();
     }
 
     private void setupTimers() {
@@ -59,15 +93,17 @@ public class GameWindow extends JFrame {
     }
 
     private void setupKeyListener() {
-        addKeyListener(new KeyAdapter() {
+        // keyState 배열 초기화
+        keyState = new boolean[256];
+        
+        gamePanel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 keyState[e.getKeyCode()] = true;
                 
-                // 스페이스바 이벤트를 별도로 처리
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    spawnNewCustomer();
-                    System.out.println("Customer spawned!");  // 디버깅용
+                // I 키 처리
+                if (e.getKeyCode() == KeyEvent.VK_I) {
+                    toggleInventory();
                 }
             }
             
@@ -76,6 +112,10 @@ public class GameWindow extends JFrame {
                 keyState[e.getKeyCode()] = false;
             }
         });
+    
+        // gamePanel에 초기 포커스 설정
+        gamePanel.setFocusable(true);
+        gamePanel.requestFocus();
     }
 
     private void updateCustomers() {

@@ -11,7 +11,7 @@ public class TillCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        tile.till();
+        tile.setTilled(true);
         System.out.println("Tilled the soil.");
     }
 }

@@ -1,11 +1,13 @@
 package game.ui;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
 import domain.Farm;
+import domain.item.Item;
 import domain.player.Player;
 import game.entity.PlayerRenderer;
 import game.tile.FarmTile;
@@ -14,15 +16,74 @@ import command.*;
 import core.CommandRegistry;
 
 public class GamePanel extends JPanel {
+    private GameWindow gameWindow;
+    private CommandRegistry registry;
     private PlayerRenderer playerRenderer;
     private Player player;
     private Farm farm;
     private List<Customer> customers;
+    private Item selectedItem;
 
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
-    private CommandRegistry registry;
     private String selectedCrop = "tomato";
+
+    private enum InputType {
+        MOUSE_LEFT(MouseEvent.BUTTON1, "till"),
+        MOUSE_RIGHT(MouseEvent.BUTTON3, "plant"),
+        KEY_H(KeyEvent.VK_H, "help"),
+        KEY_Q(KeyEvent.VK_Q, "quit"),
+        KEY_F(KeyEvent.VK_F, "farm"),
+        KEY_SPACE(KeyEvent.VK_SPACE, "harvest");
+        
+        private final int inputCode;
+        private final String commandName;
+        
+        InputType(int inputCode, String commandName) {
+            this.inputCode = inputCode;
+            this.commandName = commandName;
+        }
+        
+        public static InputType fromMouseButton(int button) {
+            for (InputType type : values()) {
+                if (type.inputCode == button && type.name().startsWith("MOUSE_")) {
+                    return type;
+                }
+            }
+            return null;
+        }
+        
+        public static InputType fromKeyCode(int keyCode) {
+            for (InputType type : values()) {
+                if (type.inputCode == keyCode && type.name().startsWith("KEY_")) {
+                    return type;
+                }
+            }
+            return null;
+        }
+        
+        public String getCommandName() {
+            return commandName;
+        }
+    }
+
+    private static class Position {
+        final int x;
+        final int y;
+        
+        private Position(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+        
+        public static Position fromMouseEvent(MouseEvent e, int tileSize) {
+            return new Position(e.getX() / tileSize, e.getY() / tileSize);
+        }
+        
+        public boolean isValidFarmPosition() {
+            return x < 8 && y < 6;
+        }
+    }
 
     private boolean isInteractable(int tileX, int tileY) {
         int playerCenterX = playerRenderer.getX() + (playerRenderer.getSize() / 2);
@@ -41,39 +102,102 @@ public class GamePanel extends JPanel {
         this.farm = farm;
         this.registry = registry;
         this.customers = customers;
-        setBackground(Color.GREEN.darker());
 
-        // initialize farm tiles(8x6)
+        initializeTiles();
+        setupMouseListener();
+        setupKeyListener();
+        setFocusable(true);
+        setBackground(Color.GREEN.darker());
+    }
+
+    public void setSelectedItem(Item item) {
+        this.selectedItem = item;
+        repaint();
+    }
+
+    public void setGameWindow(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
+    }
+
+    public void updateInventoryIfVisible() {
+        if (gameWindow != null) {
+            gameWindow.updateInventoryIfNeeded();
+        }
+    }
+
+    private void initializeTiles() {
         tiles = new FarmTile[8][6];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 6; j++) {
                 tiles[i][j] = new FarmTile();
             }
         }
-        
-        // register commands
+    }
+
+    private void setupMouseListener() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int tileX = e.getX() / TILE_SIZE;
-                int tileY = e.getY() / TILE_SIZE;
-                
-                if (tileX < 8 && tileY < 6) {  // check if clicked inside the farm
-                    FarmTile tile = tiles[tileX][tileY];
-                    
-                    if (isInteractable(tileX, tileY)) {
-                        if (e.getButton() == MouseEvent.BUTTON1) {
-                            new TillCommand(tile).execute(new String[]{});
-                        } else if (e.getButton() == MouseEvent.BUTTON3) {
-                            new PlantCommand(player, farm, tile, selectedCrop).execute(new String[]{});
-                        }
-                        repaint();
-                    } else {
-                        System.out.println("Too far away!");
-                    }
-                }
+                handleMouseClick(e);
             }
         });
+    }
+
+    private void setupKeyListener() {
+        addKeyListener(new KeyAdapter() {
+            @Override
+        public void keyPressed(KeyEvent e) {
+            InputType inputType = InputType.fromKeyCode(e.getKeyCode());
+            if (inputType != null) {
+                Command command;
+                if (inputType == InputType.KEY_SPACE) {
+                    command = new HarvestCommand(player, farm, tiles, playerRenderer, GamePanel.this);
+                } else {
+                    command = registry.getCommand(inputType.getCommandName());
+                }
+                
+                if (command != null) {
+                    command.execute(new String[]{});
+                    repaint();
+                }
+            }
+        }
+        });
+    }
+
+    private void handleMouseClick(MouseEvent e) {
+        Position clickPosition = Position.fromMouseEvent(e, TILE_SIZE);
+        
+        if (!clickPosition.isValidFarmPosition()) {
+            return;
+        }
+        
+        InputType inputType = InputType.fromMouseButton(e.getButton());
+        if (inputType != null) {
+            FarmTile tile = tiles[clickPosition.x][clickPosition.y];
+            
+            if (!isInteractable(clickPosition.x, clickPosition.y)) {
+                System.out.println("Too far away!");
+                return;
+            }
+            
+            Command command = createMouseCommand(inputType, tile);
+            if (command != null) {
+                command.execute(new String[]{});
+                repaint();
+            }
+        }
+    }
+
+    private Command createMouseCommand(InputType inputType, FarmTile tile) {
+        switch (inputType) {
+            case MOUSE_LEFT:
+                return new TillCommand(tile);
+            case MOUSE_RIGHT:
+                return new PlantCommand(player, farm, tile, selectedCrop);
+            default:
+                return null;
+        }
     }
     
     @Override
@@ -103,19 +227,33 @@ public class GamePanel extends JPanel {
                     g.setColor(new Color(139, 69, 19));
                     g.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                 }
-                
-                // if crop is planted, draw the crop
-                if (tile.hasCrop()) {
-                    if (tile.getCrop().equals("tomato")) {
-                        g.setColor(Color.RED);
-                    } else if (tile.getCrop().equals("carrot")) {
-                        g.setColor(Color.ORANGE);
-                    } else if (tile.getCrop().equals("corn")) {
-                        g.setColor(Color.YELLOW);
-                    }
-                    g.fillOval(x + 10, y + 10, TILE_SIZE - 20, TILE_SIZE - 20);
-                }
 
+                // 작물이 심어져 있다면 성장 상태에 따라 그리기
+                if (tile.hasCrop()) {
+                    int growthProgress = Math.min(100, Math.max(0, tile.getGrowthProgress()));
+                    int size = calculateCropSize(growthProgress);
+                    int alpha = Math.min(255, Math.max(0, calculateCropAlpha(growthProgress)));
+                    
+                    // 작물 이미지 그리기
+                    Image cropSprite = tile.getCrop().getSprite(size, size);
+                    
+                    // 작물 크기 중앙 정렬
+                    int cropX = x + (TILE_SIZE - size) / 2;
+                    int cropY = y + (TILE_SIZE - size) / 2;
+                    
+                    // 알파값 적용을 위한 AlphaComposite 설정
+                    Graphics2D g2d = (Graphics2D) g;
+                    AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha/255.0f);
+                    g2d.setComposite(alphaComposite);
+                    
+                    // 작물 그리기
+                    g2d.drawImage(cropSprite, cropX, cropY, null);
+                    
+                    // 알파값 원래대로 복구
+                    g2d.setComposite(AlphaComposite.SrcOver);
+                    
+                    drawProgressBar(g, x, y, TILE_SIZE, growthProgress);
+                }
             }
         }
 
@@ -128,5 +266,66 @@ public class GamePanel extends JPanel {
         
         // draw player
         playerRenderer.draw(g);
+
+        // draw selected item
+        if (selectedItem != null) {
+            int x = 10;  // 왼쪽 여백
+            int y = getHeight() - 60; // 아래 여백
+            int size = 40;
+            
+            Image itemSprite = selectedItem.getSprite(size, size);
+            g.drawImage(itemSprite, x, y, null);
+            g.setColor(Color.BLACK);
+            g.drawString(selectedItem.getName(), x, y + size + 15);
+        }
+
+        // Draw money display
+        g.setColor(new Color(0, 0, 0, 180));
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String moneyText = String.format("€ %.2f", player.getMoney());
+        FontMetrics metrics = g.getFontMetrics();
+        int moneyWidth = metrics.stringWidth(moneyText);
+        int moneyX = getWidth() - moneyWidth - 20; // 20 pixels from right edge
+        int moneyY = 30; // 30 pixels from top
+
+        // Draw background for better visibility
+        g.setColor(new Color(255, 255, 255, 180));
+        g.fillRect(moneyX - 5, moneyY - metrics.getAscent(), moneyWidth + 10, metrics.getHeight());
+
+        // Draw money text
+        g.setColor(new Color(0, 100, 0)); // Dark green color for money
+        g.drawString(moneyText, moneyX, moneyY);
+    }
+
+    private int calculateCropSize(int growthProgress) {
+        int minSize = 10;
+        int maxSize = TILE_SIZE - 10;
+        return minSize + ((maxSize - minSize) * growthProgress / 100);
+    }
+
+    private int calculateCropAlpha(int growthProgress) {
+        int minAlpha = 128;  // 50% 투명도
+        int maxAlpha = 255;  // 완전 불투명
+        return minAlpha + ((maxAlpha - minAlpha) * growthProgress / 100);
+    }
+
+    private void drawProgressBar(Graphics g, int x, int y, int tileSize, int progress) {
+        int barHeight = 4;  // 막대바 높이
+        int barWidth = tileSize - 6;  // 막대바 너비
+        int barX = x + 3;  // 막대바 X 위치
+        int barY = y + tileSize - barHeight - 3;  // 막대바 Y 위치
+        
+        // 막대바 배경 (회색)
+        g.setColor(new Color(100, 100, 100, 180));
+        g.fillRect(barX, barY, barWidth, barHeight);
+        
+        // 진행도 막대 (초록색)
+        int progressWidth = (int)((barWidth * progress) / 100.0);
+        g.setColor(new Color(50, 205, 50, 230));
+        g.fillRect(barX, barY, progressWidth, barHeight);
+        
+        // 막대바 테두리
+        g.setColor(new Color(0, 0, 0, 180));
+        g.drawRect(barX, barY, barWidth, barHeight);
     }
 }

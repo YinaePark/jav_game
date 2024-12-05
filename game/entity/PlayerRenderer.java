@@ -39,7 +39,7 @@ public class PlayerRenderer {
 
     private void loadSprites() {
         try {
-            File file = new File("sprites/player.png");
+            File file = new File("sprites/player/player.png");
             if (file.exists()) {
                 spriteSheet = ImageIO.read(file);
                 int frameWidth = spriteSheet.getWidth() / 3;

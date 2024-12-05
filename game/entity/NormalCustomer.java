@@ -23,7 +23,7 @@ public class NormalCustomer extends Customer {
     @Override
     protected void loadSprites() {
         try {
-            File file = new File("sprites/normal_customer.png");
+            File file = new File("sprites/player/normal_customer.png");
             if (file.exists()) {
                 spriteSheet = ImageIO.read(file);
                 int frameWidth = spriteSheet.getWidth() / 3;  // 3 columns
