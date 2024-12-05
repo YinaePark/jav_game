@@ -127,7 +127,7 @@ public class NormalCustomer extends Customer {
         score = Math.max(0, Math.min(score, 100));
 
         // 만족도 수준으로 변환 (0~5)
-        satisfactionLevel = score / 20;
+        satisfactionLevel = score;
 
     }
 
@@ -146,7 +146,7 @@ public class NormalCustomer extends Customer {
         int baseReward = recipe.getBaseReward();
 
         // 만족도 점수 계산: (만족도**2 - 100)
-        double satisfactionScore = Math.pow(satisfactionLevel * 20, 2) - 100;
+        double satisfactionScore = satisfactionLevel * 2 - 100;
 
         // 최종 보상 계산
         double reward = baseReward * (satisfactionScore / 100);

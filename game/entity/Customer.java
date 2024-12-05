@@ -70,7 +70,8 @@ public abstract class Customer {
     public void update() {
         if (isWaiting) {
             currentWaitingTime++;
-            if (currentWaitingTime >= maxWaitingTime) {
+            if (currentWaitingTime >= maxWaitingTime/3) {
+                System.out.println("Customer feels angry.... hurry up!!");
                 decreaseSatisfaction();
             }
         }
