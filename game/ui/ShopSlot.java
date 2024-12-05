@@ -9,19 +9,16 @@ public class ShopSlot {
     private static final int PADDING = 5;
     private Rectangle bounds;
     private Item item;
-    private int count;
     private boolean selected;
 
     public ShopSlot(int x, int y) {
         this.bounds = new Rectangle(x, y, SLOT_SIZE, SLOT_SIZE);
         this.selected = false;
-        this.count = 0; // 기본적으로 수량은 0으로 설정
     }
 
-    // 아이템과 수량을 설정하는 메소드
+    // 아이템을 설정하는 메소드
     public void setItem(Item item) {
         this.item = item;
-        this.count = count;
     }
 
     public Item getItem() {
@@ -61,13 +58,13 @@ public class ShopSlot {
                     bounds.y + PADDING,
                     null);
 
-            // 수량 표시
+            // 가격 표시 (유로 기호 포함)
             g.setColor(Color.BLACK);
-            String countStr = String.valueOf(count);
+            String priceStr = String.format("€%.2f", item.getPrice()); // 가격을 유로 형식으로 표시
             FontMetrics fm = g.getFontMetrics();
-            int textX = bounds.x + bounds.width - fm.stringWidth(countStr) - 5;
+            int textX = bounds.x + bounds.width - fm.stringWidth(priceStr) - 5;
             int textY = bounds.y + bounds.height - 5;
-            g.drawString(countStr, textX, textY);
+            g.drawString(priceStr, textX, textY);
 
             // 아이템 이름 표시 (슬롯의 상단에)
             g.setColor(Color.BLACK);

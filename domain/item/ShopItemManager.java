@@ -1,34 +1,28 @@
 package domain.item;
 
+import domain.item.crops.*;
+
 import java.util.*;
 
 public class ShopItemManager {
     private static List<Item> allItems = new ArrayList<>();
+    public ShopItemManager() {
+        this.allItems = new ArrayList<>();
+        initializeItems();
+    }    // 상점에 판매할 아이템들을 초기화합니다.
+    private static void initializeItems() {
+        allItems.add(new Olive());
+        allItems.add(new Lettuce());
+        allItems.add(new Tomato());
+        allItems.add(new Onion());
+        allItems.add(new Truffle());
+        allItems.add(new Wheat());
 
-    static {
-        // 게임에서 사용되는 아이템을 초기화 (아이템 추가)
-        allItems.add(new Item("tomato") {
-            @Override
-            public double getPrice() {
-                return 10.0;
-            }
-        });
-        allItems.add(new Item("wheat") {
-            @Override
-            public double getPrice() {
-                return 15.0;
-            }
-        });
-        allItems.add(new Item("olive") {
-            @Override
-            public double getPrice() {
-                return 20.0;
-            }
-        });
-        // 여기에 모든 아이템 추가...
     }
 
+
     public static List<Item> getAllItems() {
+        initializeItems();
         return allItems;
     }
 }
