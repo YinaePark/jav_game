@@ -1,4 +1,5 @@
 package game.ui;
+
 import game.entity.NormalCustomer;
 import domain.item.Item;
 import domain.player.Player;
@@ -72,7 +73,7 @@ public class IngredientSelectionPanel extends JDialog {
             slotLabel.setHorizontalAlignment(SwingConstants.CENTER);  // 텍스트 및 아이콘 중앙 정렬
             slotLabel.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
-                    openIngredientSelectionDialog(index);
+                    toggleIngredientSlot(index);
                 }
             });
             ingredientSlotsPanel.add(slotLabel);
@@ -91,34 +92,48 @@ public class IngredientSelectionPanel extends JDialog {
     private void updateIngredientSlot(int slotIndex, Item selectedItem) {
         // 기존 JLabel에 아이템의 아이콘과 이름을 표시
         JLabel slotLabel = (JLabel) ingredientSlotsPanel.getComponent(slotIndex);
-        slotLabel.setIcon(new ImageIcon(selectedItem.getSprite(50, 50)));  // 50x50 크기의 아이템 이미지
-        slotLabel.setText(selectedItem.getName());  // 아이템 이름
-        slotLabel.setHorizontalTextPosition(SwingConstants.CENTER);  // 텍스트 중앙 정렬
-        slotLabel.setVerticalTextPosition(SwingConstants.BOTTOM);  // 텍스트 아래쪽에 표시
+
+        if (selectedItem != null) {
+            // 아이템이 선택된 경우
+            slotLabel.setIcon(new ImageIcon(selectedItem.getSprite(50, 50)));  // 50x50 크기의 아이템 이미지
+            slotLabel.setText(selectedItem.getName());  // 아이템 이름
+            slotLabel.setHorizontalTextPosition(SwingConstants.CENTER);  // 텍스트 중앙 정렬
+            slotLabel.setVerticalTextPosition(SwingConstants.BOTTOM);  // 텍스트 아래쪽에 표시
+        } else {
+            // 아이템이 없으면 슬롯 비우기
+            slotLabel.setIcon(null);  // 아이템 이미지 제거
+            slotLabel.setText("");  // 텍스트 제거
+        }
+
         slotLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));  // 테두리 추가
     }
+    private void toggleIngredientSlot(int slotIndex) {
+        // 슬롯에 아이템이 이미 있으면, 해당 아이템을 인벤토리로 되돌려 놓음
+        if (selectedIngredients[slotIndex] != null) {
+            Item itemToRemove = selectedIngredients[slotIndex];
+            player.addItem(itemToRemove);  // 인벤토리에 아이템을 추가
+            selectedIngredients[slotIndex] = null;  // 슬롯을 비움
+            updateIngredientSlot(slotIndex, null);  // 슬롯을 비움
+            inventoryPanel.updateInventory(player.getInventory());  // 인벤토리 업데이트
+            JOptionPane.showMessageDialog(this, itemToRemove.getName() + " has been removed from Slot " + (slotIndex + 1));
 
-    private void openIngredientSelectionDialog(int slotIndex) {
-        Item selectedItem = inventoryPanel.getSelectedItem();
-        if (selectedItem != null) {
-            // 재료 슬롯에 아이템 채우기
-            selectedIngredients[slotIndex] = selectedItem;
-            // 아이템을 인벤토리에서 삭제
-            player.removeItem(selectedItem.getName());
-
-            // 재료 슬롯에 아이템 아이콘과 이름을 표시
-            updateIngredientSlot(slotIndex, selectedItem);
-
-            // 인벤토리 업데이트
-            inventoryPanel.updateInventory(player.getInventory());
-
-            JOptionPane.showMessageDialog(this, "Selected " + selectedItem.getName() + " for Slot " + (slotIndex + 1));
+            // 아이템이 사라지는 효과를 주기 위해 selectedItem을 null로 설정
+            inventoryPanel.setSelectedItem(null);  // 인벤토리에서 선택된 아이템도 사라짐
         } else {
-            JOptionPane.showMessageDialog(this, "No item selected.");
+            // 슬롯에 아이템이 없으면, 인벤토리에서 선택된 아이템을 슬롯에 배치
+            Item selectedItem = inventoryPanel.getSelectedItem();
+            if (selectedItem != null) {
+                selectedIngredients[slotIndex] = selectedItem;
+                player.removeItem(selectedItem.getName());  // 아이템을 인벤토리에서 제거
+                updateIngredientSlot(slotIndex, selectedItem);  // 슬롯에 아이템 표시
+                inventoryPanel.updateInventory(player.getInventory());  // 인벤토리 업데이트
+                JOptionPane.showMessageDialog(this, selectedItem.getName() + " has been added to Slot " + (slotIndex + 1));
+                inventoryPanel.setSelectedItem(null);
+            } else {
+                JOptionPane.showMessageDialog(this, "No item selected.");
+            }
         }
     }
-
-
 
 
     public void addSubmitListener(ActionListener listener) {
