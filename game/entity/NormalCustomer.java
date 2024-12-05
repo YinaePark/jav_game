@@ -127,7 +127,7 @@ public class NormalCustomer extends Customer {
         // 점수 0 이하일 경우 0으로 설정
         score = Math.max(0, Math.min(score, 100));
 
-        // 만족도 수준으로 변환 (0~5)
+        // 만족도 수준으로 변환 (0~100)
         satisfactionLevel = score;
 
     }
@@ -151,11 +151,6 @@ public class NormalCustomer extends Customer {
 
         // 최종 보상 계산
         double reward = baseReward * (satisfactionScore / 100);
-
-        // 만족도가 낮으면 음수 보상
-        if (satisfactionLevel <= 1) {
-            reward = -BASE_REWARD;
-        }
 
         return (int) reward;
 

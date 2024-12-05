@@ -47,7 +47,7 @@ public class IngredientSelectionPanel extends JDialog {
             player.earnMoney(reward);  // player.addMoney는 플레이어 클래스에서 보상을 추가하는 메서드
 
             // 결과 메시지 표시
-            JOptionPane.showMessageDialog(this, "You have earned " + reward + " money!");
+            JOptionPane.showMessageDialog(this, "You have earned " + reward + " euros!");
         }
 
         // 대화 상자 닫기

@@ -4,6 +4,7 @@ import domain.item.HarvestItem;
 import domain.item.Item;
 import domain.item.crops.Onion;
 import domain.item.crops.Tomato;
+import game.entity.NormalCustomer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +79,43 @@ public class Player {
     }
 
     // if harvest success, add item to inventory
+    // 요리 판매: 5개의 재료를 사용하여 요리 판매
+    public void sellDish(List<Item> dishIngredients, NormalCustomer customer) {
+        if (dishIngredients.size() != 5) {
+            System.out.println("A dish requires exactly 5 ingredients.");
+            return;
+        }
+
+        // 인벤토리에서 재료가 있는지 확인
+        for (Item item : dishIngredients) {
+            if (!inventory.contains(item)) {
+                System.out.println("Missing ingredient: " + item.getName());
+                return;  // 부족한 재료가 있으면 판매하지 않음
+            }
+        }
+
+        // 재료 제거
+        for (Item item : dishIngredients) {
+            removeItem(item.getName());
+        }
+
+        // 판매한 요리에 대한 보상 추가 (예시로 100 단위로 설정)
+        int reward = customer.calculateReward();
+        earnMoney(reward);
+        System.out.println("Dish sold for "+ reward + " euros!");
+        notifyInventoryChange(); // 변경 알림
+
+    }
+
+    // 농작물 심기: 단지 농장에 심는 작업만 수행
+    public boolean plantCrop(HarvestItem cropItem, double plantingCost) {
+        if (spendMoney(plantingCost)) {
+            System.out.println("Planted " + cropItem.getName() + "!");
+            return true;
+        }
+        return false;
+    }
+    // 농작물 수확: 수확 가능한 경우 인벤토리에 추가
     public boolean harvestCrop(HarvestItem cropItem) {
         if (!cropItem.isReadyToHarvest()) {
             System.out.println(cropItem.getName() + " is not ready to harvest yet.");
