@@ -2,16 +2,19 @@ package core;
 
 import command.*;
 import domain.Farm;
+import domain.item.ShopItem;
 import domain.player.Player;
 import domain.item.Item;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandRegistry {
     private final Map<String, Command> commands = new HashMap<>();
     private Player player;
     private Farm farm;
+    private List<ShopItem> shopItems;
 
     // Player 객체를 전달받는 생성자
     public CommandRegistry(Player player, Farm farm) {
@@ -42,5 +45,7 @@ public class CommandRegistry {
             System.out.println("Exiting game... Goodbye!");
             System.exit(0);
         });
+        register("buy", new BuyCommand(player));
+        // register("quit", args -> System.out.println("Exiting the game... Goodbye!"));
     }
 }

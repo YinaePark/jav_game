@@ -16,6 +16,8 @@ public class Player {
         this.inventory = new ArrayList<>();
     }
 
+    public int getMaxInventorySize() {return MAX_INVENTORY_SIZE;}
+
     // 돈 차감
     public boolean spendMoney(double amount) {
         if (amount > money) {
