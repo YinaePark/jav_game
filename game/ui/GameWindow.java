@@ -29,7 +29,11 @@ public class GameWindow extends JFrame {
     private static final int CUSTOMER_SPAWN_Y = 600;
     private static final int CUSTOMER_TARGET_Y = 300;
     private Random random = new Random();
-    
+
+    private Timer customerSpawnTimer; //고객 스폰 타이머
+    private boolean isCustomerPresent = false; //현재 고객이 있는지 여부
+    private int customerCount = 0;
+
     public GameWindow() {
         setTitle("Farming Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,7 +96,11 @@ public class GameWindow extends JFrame {
         gameTimer.start();
 
         // 고객 스폰 타이머
-        Timer customerSpawnTimer = new Timer(3000, e -> spawnNewCustomer());
+        customerSpawnTimer = new Timer(10000, e -> {
+            if (!isCustomerPresent && customerCount < 3) {
+                spawnNewCustomer();
+            }
+        });
         customerSpawnTimer.start();
     }
 
@@ -123,18 +131,42 @@ public class GameWindow extends JFrame {
     }
 
     private void updateCustomers() {
-        for (Customer customer : customers) {
+        for (int i=0; i< customers.size(); i++) {
+            Customer customer = customers.get(i);
             customer.update();
+
+            //고객이 maxWaitingTime을 초과하면 돌아간다.
+            if (customer.isWaitingTooLong()){
+                customers.remove(i);
+                System.out.println("A customer has left due to waiting too long.");
+                i--; // list index modify
+            }
+
+            //고객이 주문을 완료했을 때
+            if (customer.isOrderComplete()){
+                customers.remove(i);
+                customerCount++;
+                isCustomerPresent = false;
+                System.out.println("Order complete. Customer left.");
+                i--;
+            }
+        }
+
+        // 게임 안내: 고객 수가 3명이 되면 안내
+        if (customerCount>=3) {
+            System.out.println("3 customers served.");
+
         }
     }
 
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(600) + 100; // 100 ~ 700 사이 
+        int spawnX = random.nextInt(200) + 100; // 100 ~ 300 사이
         
         Customer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
             private double currentY = CUSTOMER_SPAWN_Y;
             private static final double MOVE_SPEED = 2.0;
-            
+            private long spawnTime;
+
             @Override
             public void update() {
                 if (currentY > CUSTOMER_TARGET_Y) {
@@ -150,10 +182,25 @@ public class GameWindow extends JFrame {
                 }
                 
                 super.update();
+                if (spawnTime == 0){
+                    spawnTime = System.currentTimeMillis(); // 손님 등장 시간 기록
+                }
+            }
+            // 손님 너무 오래 기다리면 돌아감
+            @Override
+            public boolean isWaitingTooLong() {
+                return System.currentTimeMillis() - spawnTime > maxWaitingTime;
+            }
+
+            @Override
+            public boolean isOrderComplete() {
+                // 주문 완료 시 true 반환 (주문 완료 조건 구현)
+                return false;
             }
         };
         
         customers.add(newCustomer);
+        isCustomerPresent = true;
         System.out.println("New customer added at position: " + spawnX + ", " + CUSTOMER_SPAWN_Y);  // 디버깅용
     }
 

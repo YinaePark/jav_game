@@ -28,7 +28,12 @@ public abstract class Customer {
     protected int satisfactionLevel;      // satisfaction level(0~5)
     protected int maxWaitingTime;         // maximum waiting time
     protected int currentWaitingTime;     // current waiting time
-    
+    public boolean isWaitingTooLong() {
+        return false;
+    }
+    public boolean isOrderComplete() {
+        return false;
+    }
     protected enum Direction {
         DOWN, UP, SIDE
     }

@@ -4,6 +4,11 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.ImageObserver;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+
 import java.util.List;
 
 import domain.Farm;
@@ -27,6 +32,8 @@ public class GamePanel extends JPanel {
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
     private String selectedCrop = "tomato";
+
+    private Image backgroundImage;
 
     private enum InputType {
         MOUSE_LEFT(MouseEvent.BUTTON1, "till"),
@@ -108,6 +115,18 @@ public class GamePanel extends JPanel {
         setupKeyListener();
         setFocusable(true);
         setBackground(Color.GREEN.darker());
+
+        loadBackgroundImage();
+    }
+
+    private void loadBackgroundImage() {
+        try {
+            backgroundImage = ImageIO.read(new File("sprites/background/background.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            backgroundImage = null;
+        }
+
     }
 
     public void setSelectedItem(Item item) {
@@ -203,7 +222,13 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+
+        if (backgroundImage != null){
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), (ImageObserver) null);
+        } else {
+            g.setColor(Color.GREEN.darker());
+            g.fillRect(0,0, getWidth(), getHeight());
+        }
         // draw grid
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 6; j++) {
@@ -213,13 +238,13 @@ public class GamePanel extends JPanel {
                 
                 // draw tile
                 if (isInteractable(i, j)) {
-                    g.setColor(new Color(24, 100, 24));
+                    g.setColor(new Color(120,120, 100, 150));
                 } else {
-                    g.setColor(new Color(34, 139, 34));
+                    g.setColor(new Color(80, 80, 80, 150));
                 }
                 g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-                g.setColor(new Color(101, 67, 33));
+                g.setColor(new Color(101, 67, 33, 150));
                 g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
                 
                 // if tilled, fill the tile with dark brown
