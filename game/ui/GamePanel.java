@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 import domain.Farm;
+import domain.item.HarvestItem;
 import domain.item.Item;
 import domain.player.Player;
 import game.entity.PlayerRenderer;
@@ -28,6 +29,8 @@ public class GamePanel extends JPanel {
     private Farm farm;
     private List<Customer> customers;
     private Item selectedItem;
+    private InventoryPanel inventoryPanel;
+
 
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
@@ -109,6 +112,8 @@ public class GamePanel extends JPanel {
         this.farm = farm;
         this.registry = registry;
         this.customers = customers;
+        this.inventoryPanel = new InventoryPanel(player, this);
+
 
         initializeTiles();
         setupMouseListener();
@@ -134,6 +139,9 @@ public class GamePanel extends JPanel {
         repaint();
     }
 
+    public InventoryPanel getInventoryPanel() {
+        return inventoryPanel;
+    }
     public void setGameWindow(GameWindow gameWindow) {
         this.gameWindow = gameWindow;
     }
@@ -213,7 +221,14 @@ public class GamePanel extends JPanel {
             case MOUSE_LEFT:
                 return new TillCommand(tile);
             case MOUSE_RIGHT:
-                return new PlantCommand(player, farm, tile, selectedCrop);
+                if (selectedItem != null) {
+                    return new PlantCommand(player, farm, tile, selectedItem.getName(), this);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please select a valid crop to plant.", "No Crop Selected", JOptionPane.WARNING_MESSAGE);
+                    return null;
+                }
+//            case MOUSE_RIGHT:
+//                return new PlantCommand(player, farm, tile, selectedCrop);
             default:
                 return null;
         }

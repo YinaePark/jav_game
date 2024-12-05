@@ -17,6 +17,7 @@ public abstract class Item implements UsableInDish {
         loadSprite();
     }
 
+
     private void loadSprite() {
         try {
             // sprites 폴더 내의 items 폴더에서 이미지를 로드

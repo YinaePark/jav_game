@@ -12,7 +12,7 @@ public class InventoryPanel extends JPanel {
     private static final int ROWS = 5;
     private static final int COLS = 5;
     private static final int PANEL_PADDING = 10;
-    
+
     private InventorySlot[][] slots;
     private Player player;
     private Item selectedItem;
@@ -22,16 +22,19 @@ public class InventoryPanel extends JPanel {
         this.player = player;
         this.gamePanel = gamePanel;
         this.slots = new InventorySlot[ROWS][COLS];
-        
+
         setPreferredSize(new Dimension(300, 300));
         initializeSlots();
         addMouseListener(new InventoryMouseListener());
+
+        // Add listener to detect inventory changes
+        player.addInventoryChangeListener(this::updateInventory); // 수정된 호출
     }
 
     private void initializeSlots() {
         int slotSize = 50;
         int spacing = 5;
-        
+
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 int x = PANEL_PADDING + j * (slotSize + spacing);
@@ -41,7 +44,7 @@ public class InventoryPanel extends JPanel {
         }
     }
 
-    public void updateInventory() {
+    public void updateInventory(List<Item> items) { // 매개변수 추가
         // 모든 슬롯 초기화
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
@@ -51,7 +54,7 @@ public class InventoryPanel extends JPanel {
 
         // 인벤토리 아이템을 종류별로 그룹화
         Map<String, List<Item>> itemGroups = new HashMap<>();
-        for (Item item : getPlayerInventory()) {
+        for (Item item : items) { // 전달받은 아이템 리스트 사용
             itemGroups.computeIfAbsent(item.getName(), k -> new ArrayList<>()).add(item);
         }
 
@@ -59,19 +62,14 @@ public class InventoryPanel extends JPanel {
         int slotIndex = 0;
         for (Map.Entry<String, List<Item>> entry : itemGroups.entrySet()) {
             if (slotIndex >= ROWS * COLS) break;
-            
+
             int row = slotIndex / COLS;
             int col = slotIndex % COLS;
             slots[row][col].setItem(entry.getValue().get(0), entry.getValue().size());
             slotIndex++;
         }
-        
-        repaint();
-    }
 
-    private List<Item> getPlayerInventory() {
-        // Player 클래스에서 inventory를 가져오는 메서드 필요
-        return player.getInventory();  // 이 메서드는 Player 클래스에 추가해야 함
+        repaint();
     }
 
     @Override
@@ -79,7 +77,7 @@ public class InventoryPanel extends JPanel {
         super.paintComponent(g);
         g.setColor(new Color(200, 200, 200));
         g.fillRect(0, 0, getWidth(), getHeight());
-        
+
         // 모든 슬롯 그리기
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
@@ -92,21 +90,21 @@ public class InventoryPanel extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             Point point = e.getPoint();
-            
+
             // 이전 선택 해제
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if (slots[i][j].contains(point)) {
                         // 다른 모든 슬롯의 선택 해제
                         clearSelection();
-                        
+
                         // 새로운 슬롯 선택
                         slots[i][j].setSelected(true);
                         selectedItem = slots[i][j].getItem();
-                        
+
                         // GamePanel에 선택된 아이템 정보 전달
                         gamePanel.setSelectedItem(selectedItem);
-                        
+
                         repaint();
                         return;
                     }

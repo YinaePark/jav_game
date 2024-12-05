@@ -68,7 +68,7 @@ public class GameWindow extends JFrame {
 
     public void updateInventoryIfNeeded() {
         if (isInventoryVisible && inventoryPanel != null) {
-            inventoryPanel.updateInventory();
+            inventoryPanel.updateInventory(player.getInventory());
             inventoryPanel.repaint();
         }
     }
@@ -78,7 +78,7 @@ public class GameWindow extends JFrame {
         inventoryPanel.setVisible(isInventoryVisible);
         if (isInventoryVisible) {
             setSize(1100, 600);  // 인벤토리가 보일 때 크기
-            inventoryPanel.updateInventory();
+            updateInventoryIfNeeded();  // 인벤토리 상태 업데이트
         } else {
             setSize(800, 600);  // 인벤토리가 숨겨질 때 크기
         }
