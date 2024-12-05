@@ -1,5 +1,6 @@
 package command;
 import domain.item.Item;
+import domain.item.crops.*;
 import game.tile.FarmTile;
 import domain.Farm;
 import domain.item.HarvestItem;
@@ -87,17 +88,17 @@ public class PlantCommand implements Command {
     private HarvestItem createCrop(String cropName) {
         switch (cropName.toLowerCase()) {
             case "onion":
-                return new HarvestItem("Onion", 2, 5); // 가격 2, 성장 시간 5
+                return new Onion(); // Onion 클래스 반환
             case "olive":
-                return new HarvestItem("Olive", 3, 15);
+                return new Olive(); // Olive 클래스 반환
             case "tomato":
-                return new HarvestItem("Tomato", 2, 10);
+                return new Tomato(); // Tomato 클래스 반환
             case "lettuce":
-                return new HarvestItem("Lettuce", 2, 3);
+                return new Lettuce(); // Lettuce 클래스 반환
             case "wheat":
-                return new HarvestItem("Wheat", 4, 4);
+                return new Wheat(); // Wheat 클래스 반환
             case "truffle":
-                return new HarvestItem("Truffle", 20, 600);
+                return new Truffle(); // Truffle 클래스 반환
             default:
                 return null; // 알 수 없는 작물 이름 처리
         }

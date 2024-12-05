@@ -148,6 +148,7 @@ public class Player {
         for (Item item : inventory) {
             System.out.println("- " + item.getName());
         }
+        System.out.println("MONEY : " + getMoney());
     }
 
     // 인벤토리 최대 개수 조회
