@@ -24,9 +24,9 @@ public class RecipeManager {
 
     private void initializeRecipes() {
         // 3 ingredients recipes
-        addRecipe("onion soup", Arrays.asList("onion", "cheese", "butter"), 6);
+        addRecipe("onion_soup", Arrays.asList("onion", "cheese", "butter"), 6);
         addRecipe("salad", Arrays.asList("lettuce", "tomato", "olive"), 5);
-        addRecipe("tomato pasta", Arrays.asList("wheat", "tomato", "meat"), 9);
+        addRecipe("tomato_pasta", Arrays.asList("wheat", "tomato", "meat"), 9);
         addRecipe("sandwich", Arrays.asList("wheat", "lettuce", "tomato"), 7);
         addRecipe("steak", Arrays.asList("meat", "onion", "butter"), 10);
         addRecipe("escargot", Arrays.asList("snail", "onion", "butter"), 11);
@@ -35,9 +35,9 @@ public class RecipeManager {
         addRecipe("hamburger", Arrays.asList("meat", "wheat", "lettuce", "tomato"), 9);
 
         // 5 ingredients recipes
-        addRecipe("carbonara pasta", Arrays.asList("wheat", "egg", "cheese", "meat", "onion"), 11);
-        addRecipe("cream gnocchi", Arrays.asList("wheat", "milk", "potato", "butter", "cheese"), 12);
-        addRecipe("truffle pasta", Arrays.asList("truffle", "cheese", "milk", "butter", "wheat"), 16);
+        addRecipe("carbonara_pasta", Arrays.asList("wheat", "egg", "cheese", "meat", "onion"), 11);
+        addRecipe("cream_gnocchi", Arrays.asList("wheat", "milk", "potato", "butter", "cheese"), 12);
+        addRecipe("truffle_pasta", Arrays.asList("truffle", "cheese", "milk", "butter", "wheat"), 16);
     }
 
     private void addRecipe(String name, List<String> ingredients, int baseReward) {

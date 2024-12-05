@@ -1,25 +1,26 @@
 package game.ui;
 
-import javax.swing.*;
-
+import command.*;
+import core.CommandRegistry;
+import domain.Farm;
+import domain.item.Item;
+import domain.player.Player;
+import game.entity.Customer;
+import game.entity.PlayerRenderer;
+import game.recipe.Recipe;
+import game.recipe.RecipeManager;
+import game.tile.FarmTile;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.ImageObserver;
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
-import domain.Farm;
-import domain.item.HarvestItem;
-import domain.item.Item;
-import domain.player.Player;
-import game.entity.PlayerRenderer;
-import game.tile.FarmTile;
-import game.entity.Customer;
-import command.*;
-import core.CommandRegistry;
 
 public class GamePanel extends JPanel {
     private GameWindow gameWindow;
@@ -166,6 +167,8 @@ public class GamePanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 handleMouseClick(e);
+                handleCustomerClick(e);
+
             }
         });
     }
@@ -368,4 +371,65 @@ public class GamePanel extends JPanel {
         g.setColor(new Color(0, 0, 0, 180));
         g.drawRect(barX, barY, barWidth, barHeight);
     }
+
+
+    private void handleCustomerClick(MouseEvent e) {
+        // 1. 클릭된 위치의 고객 찾기
+        Customer customer = findCustomerAtPosition(e.getX(), e.getY());
+        if (customer == null) {
+            return; // 고객이 없다면 처리 종료
+        }
+
+        // 2. 고객에게 요리가 할당되지 않았으면 할당
+        if (!customer.hasAssignedRecipes()) {
+            assignRandomRecipesToCustomer(customer, 3); // 3개의 랜덤 요리 할당
+        }
+
+        // 3. 요리 선택 다이얼로그 표시
+        showDishSelectionDialog(customer);
+    }
+
+    private Customer findCustomerAtPosition(int x, int y) {
+        for (Customer customer : customers) {
+            if (customer.contains(x, y)) {
+                return customer;
+            }
+        }
+        return null; // 클릭된 위치에 고객이 없을 경우
+    }
+
+    private void assignRandomRecipesToCustomer(Customer customer, int count) {
+        List<Recipe> allRecipes = RecipeManager.getInstance().getRecipesByDifficulty(count); // 난이도 조건
+        Random rand = new Random();
+        List<Recipe> randomRecipes = new ArrayList<>();
+        while (randomRecipes.size() < count) {
+            Recipe randomRecipe = allRecipes.get(rand.nextInt(allRecipes.size()));
+            if (!randomRecipes.contains(randomRecipe)) {
+                randomRecipes.add(randomRecipe);
+            }
+        }
+        customer.assignRecipes(randomRecipes);
+    }
+
+    private void showDishSelectionDialog(Customer customer) {
+        List<Recipe> customerRecipes = customer.getAssignedRecipes();
+
+        // ChoiceDishPanel 생성
+        JPanel panel = new JPanel(new BorderLayout());
+        ChoiceDishPanel choiceDishPanel = new ChoiceDishPanel(customerRecipes, selectedDish -> {
+//            serveDishToCustomer(selectedDish, customer); // 요리 제공 처리
+            ((JDialog) SwingUtilities.getWindowAncestor(panel)).dispose(); // 다이얼로그 닫기
+        });
+
+        // 다이얼로그 구성
+        panel.add(choiceDishPanel, BorderLayout.CENTER);
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Select a Dish for Customer");
+        dialog.setModal(true);
+        dialog.add(panel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
 }

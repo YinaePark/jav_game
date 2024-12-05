@@ -1,12 +1,9 @@
 package game.entity;
 
+import game.recipe.Recipe;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 public abstract class Customer {
     protected int x, y;
@@ -34,6 +31,8 @@ public abstract class Customer {
     public boolean isOrderComplete() {
         return false;
     }
+    private List<Recipe> assignedRecipes; // 고객에게 할당된 요리 목록
+
     protected enum Direction {
         DOWN, UP, SIDE
     }
@@ -41,11 +40,23 @@ public abstract class Customer {
     public Customer(int x, int y) {
         this.x = x;
         this.y = y;
+        this.assignedRecipes = null; // 초기에는 null
         this.satisfactionLevel = 5;  // initial satisfaction level
         loadSprites();
         initializeCustomer();
     }
-    
+
+    public List<Recipe> getAssignedRecipes() {
+        return assignedRecipes;
+    }
+
+    public void assignRecipes(List<Recipe> recipes) {
+        this.assignedRecipes = recipes;
+    }
+
+    public boolean hasAssignedRecipes() {
+        return assignedRecipes != null;
+    }
     // abstract methods
     protected abstract void loadSprites();  // load sprites for customer
     protected abstract void initializeCustomer();
@@ -128,4 +139,10 @@ public abstract class Customer {
     public int getX() { return x; }
     public int getY() { return y; }
     public int getCurrentWaitingTime() { return currentWaitingTime; }
+    // 추가된 contains 메서드
+    public boolean contains(int mouseX, int mouseY) {
+        // 마우스 클릭이 고객 영역 내에 있는지 확인
+        return mouseX >= x && mouseX <= x + SIZE && mouseY >= y && mouseY <= y + SIZE;
+    }
+
 }
