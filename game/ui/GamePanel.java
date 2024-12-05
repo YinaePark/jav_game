@@ -230,8 +230,6 @@ public class GamePanel extends JPanel {
                     JOptionPane.showMessageDialog(this, "Please select a valid crop to plant.", "No Crop Selected", JOptionPane.WARNING_MESSAGE);
                     return null;
                 }
-//            case MOUSE_RIGHT:
-//                return new PlantCommand(player, farm, tile, selectedCrop);
             default:
                 return null;
         }
