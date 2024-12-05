@@ -1,6 +1,7 @@
 package domain.item;
 
 import domain.item.crops.*;
+import domain.item.ingredients.*;
 
 import java.util.*;
 
@@ -17,6 +18,12 @@ public class ShopItemManager {
         allItems.add(new Onion());
         allItems.add(new Truffle());
         allItems.add(new Wheat());
+        allItems.add(new Meat());
+        allItems.add(new Egg());
+        allItems.add(new Milk());
+        allItems.add(new Snail());
+
+
 
     }
 
