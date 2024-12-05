@@ -1,6 +1,7 @@
 package game.ui;
 
 import domain.item.Item;
+import domain.item.ItemManager;
 import domain.player.Player;
 
 import javax.swing.*;
@@ -27,6 +28,8 @@ public class ShopPanel extends JPanel {
         setPreferredSize(new Dimension(300, 300));
         initializeSlots();
         addMouseListener(new ShopMouseListener());
+        updateShop(ItemManager.getAllItems());
+
     }
 
     private void initializeSlots() {
@@ -40,6 +43,7 @@ public class ShopPanel extends JPanel {
                 slots[i][j] = new ShopSlot(x, y);
             }
         }
+
     }
 
     public void toggleVisibility() {
@@ -52,12 +56,9 @@ public class ShopPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // ShopPanel이 숨겨져 있으면 그리지 않음
-        if (!isVisible) return;
-
         // ShopPanel 배경을 흰색으로 설정
-        g.setColor(Color.LIGHT_GRAY);
-        g.fillRect(0, 0, getWidth(), getHeight()); // 전체 배경을 흰색으로 채우기
+        g.setColor(Color.darkGray);
+        g.fillRect(0, 0, getWidth(), getHeight());
 
         // 슬롯들을 그린다.
         for (int i = 0; i < ROWS; i++) {
