@@ -17,12 +17,22 @@ public abstract class Customer {
     protected int animationDelay = 0;
     protected static final int ANIMATION_SPEED = 12;
     protected boolean isWaiting = true;
+    protected BufferedImage[] frontSprites;
+    protected BufferedImage[] backSprites;
+    protected BufferedImage[] sideSprites;
+    protected Direction facing = Direction.DOWN;
+    protected boolean facingLeft = true;
+    protected boolean isMoving = false;
     
     protected List<String> orderedMenus;  // menu list
     protected int satisfactionLevel;      // satisfaction level(0~5)
     protected int maxWaitingTime;         // maximum waiting time
     protected int currentWaitingTime;     // current waiting time
     
+    protected enum Direction {
+        DOWN, UP, SIDE
+    }
+
     public Customer(int x, int y) {
         this.x = x;
         this.y = y;
@@ -48,18 +58,41 @@ public abstract class Customer {
     }
     
     protected void updateAnimation() {
-        animationDelay++;
-        if (animationDelay >= ANIMATION_SPEED) {
-            currentFrame = (currentFrame + 1) % sprites.length;
-            animationDelay = 0;
+        if (isMoving) {
+            animationDelay++;
+            if (animationDelay >= ANIMATION_SPEED) {
+                currentFrame = (currentFrame + 1) % 4;
+                animationDelay = 0;
+            }
+        } else {
+            currentFrame = 0;  // idle frame
         }
     }
     
     public void draw(Graphics g) {
-        if (sprites != null && sprites.length > 0) {
-            BufferedImage currentSprite = sprites[currentFrame];
+        if (spriteSheet != null) {
+            BufferedImage currentSprite = null;
+            
+            // determine which sprite to draw
+            switch (facing) {
+                case DOWN:
+                    currentSprite = frontSprites[currentFrame];
+                    break;
+                case UP:
+                    currentSprite = backSprites[currentFrame];
+                    break;
+                case SIDE:
+                    currentSprite = sideSprites[currentFrame];
+                    break;
+            }
+            
             if (currentSprite != null) {
-                g.drawImage(currentSprite, x, y, SIZE, SIZE, null);
+                if (facing == Direction.SIDE && facingLeft) {
+                    // flip sprite horizontally
+                    g.drawImage(currentSprite, x + SIZE, y, -SIZE, SIZE, null);
+                } else {
+                    g.drawImage(currentSprite, x, y, SIZE, SIZE, null);
+                }
             }
         } else {
             g.setColor(Color.BLUE);

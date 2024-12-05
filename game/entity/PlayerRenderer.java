@@ -22,7 +22,7 @@ public class PlayerRenderer {
     private boolean facingLeft = true;
     private double targetX;
     private double targetY;
-    private static final double MOVEMENT_SPEED = 4.0;
+    private static final double MOVEMENT_SPEED = 6.0;
     private boolean isMovingToTarget = false;
 
     private enum Direction {
