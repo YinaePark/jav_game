@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class NormalCustomer extends Customer {
     private static final int MAX_WAITING_MINUTES = 300;  // 5min
@@ -29,12 +26,27 @@ public class NormalCustomer extends Customer {
             File file = new File("sprites/normal_customer.png");
             if (file.exists()) {
                 spriteSheet = ImageIO.read(file);
-                int frameWidth = spriteSheet.getWidth() / 4;  // 4 frames
-                int frameHeight = spriteSheet.getHeight();
+                int frameWidth = spriteSheet.getWidth() / 3;  // 3 columns
+                int frameHeight = spriteSheet.getHeight() / 4; // 4 rows
                 
-                sprites = new BufferedImage[4];
+                // initialize sprite arrays
+                frontSprites = new BufferedImage[4];
+                backSprites = new BufferedImage[4];
+                sideSprites = new BufferedImage[4];
+                
+                // Load front animations
                 for (int i = 0; i < 4; i++) {
-                    sprites[i] = spriteSheet.getSubimage(i * frameWidth, 0, frameWidth, frameHeight);
+                    frontSprites[i] = spriteSheet.getSubimage(0, i * frameHeight, frameWidth, frameHeight);
+                }
+                
+                // Load back animations
+                for (int i = 0; i < 4; i++) {
+                    backSprites[i] = spriteSheet.getSubimage(frameWidth, i * frameHeight, frameWidth, frameHeight);
+                }
+                
+                // Load side animations
+                for (int i = 0; i < 4; i++) {
+                    sideSprites[i] = spriteSheet.getSubimage(frameWidth * 2, i * frameHeight, frameWidth, frameHeight);
                 }
             }
         } catch (IOException e) {
@@ -53,7 +65,7 @@ public class NormalCustomer extends Customer {
         Random random = new Random();
         orderedMenus = new ArrayList<>();
         // available menus
-        String[] availableMenus = {"onion soup",}; /// need to add
+        String[] availableMenus = {"onion soup", "salad", "tomato pasta", "sandwich", "steak", "escargot"};
         
         while (orderedMenus.size() < 3) {
             String menu = availableMenus[random.nextInt(availableMenus.length)];

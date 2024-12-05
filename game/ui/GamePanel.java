@@ -3,11 +3,13 @@ package game.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 
 import domain.Farm;
 import domain.player.Player;
 import game.entity.PlayerRenderer;
 import game.tile.FarmTile;
+import game.entity.Customer;
 import command.*;
 import core.CommandRegistry;
 
@@ -15,6 +17,7 @@ public class GamePanel extends JPanel {
     private PlayerRenderer playerRenderer;
     private Player player;
     private Farm farm;
+    private List<Customer> customers;
 
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
@@ -32,11 +35,12 @@ public class GamePanel extends JPanel {
                Math.abs(tileY - playerTileY) <= 1;
     }
     
-    public GamePanel(PlayerRenderer playerRenderer, Player player, Farm farm, CommandRegistry registry) {
+    public GamePanel(PlayerRenderer playerRenderer, Player player, Farm farm, CommandRegistry registry, List<Customer> customers) {
         this.playerRenderer = playerRenderer;
         this.player = player;
         this.farm = farm;
         this.registry = registry;
+        this.customers = customers;
         setBackground(Color.GREEN.darker());
 
         // initialize farm tiles(8x6)
@@ -111,6 +115,14 @@ public class GamePanel extends JPanel {
                     }
                     g.fillOval(x + 10, y + 10, TILE_SIZE - 20, TILE_SIZE - 20);
                 }
+
+            }
+        }
+
+        // draw customers
+        if (customers != null) {
+            for (Customer customer : customers) {
+                customer.draw(g);
             }
         }
         

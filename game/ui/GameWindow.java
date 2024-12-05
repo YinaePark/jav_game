@@ -1,22 +1,29 @@
 package game.ui;
 
 import javax.swing.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import core.CommandRegistry;
-
-import java.awt.event.*;
-
 import domain.Farm;
 import domain.player.Player;
 import game.entity.PlayerRenderer;
+import game.entity.Customer;
+import game.entity.NormalCustomer;
 
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
     private PlayerRenderer playerRenderer;
     private Player player;
     private Farm farm;
-    private Timer animationTimer;
     private boolean[] keyState = new boolean[256];
+    
+    private List<Customer> customers;
+    private static final int CUSTOMER_SPAWN_Y = 600;
+    private static final int CUSTOMER_TARGET_Y = 300;
+    private Random random = new Random();
     
     public GameWindow() {
         setTitle("Farming Game");
@@ -24,41 +31,86 @@ public class GameWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
-        playerRenderer = new PlayerRenderer(50, 50); // initial position
+        customers = new ArrayList<>();
+        
+        player = new Player(20);
+        playerRenderer = new PlayerRenderer(50, 50);
         farm = new Farm();
         CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
-        gamePanel = new GamePanel(playerRenderer, player, farm, registry);
+        gamePanel = new GamePanel(playerRenderer, player, farm, registry, customers);
 
-        animationTimer = new Timer(1000/60, e -> {
+        setupTimers();
+        setupKeyListener();
+        
+        add(gamePanel);
+        setFocusable(true);
+    }
+
+    private void setupTimers() {
+        // 게임 타이머
+        Timer gameTimer = new Timer(16, e -> {
+            updatePlayerMovement();
             playerRenderer.update();
+            updateCustomers();  // customers update 추가
             gamePanel.repaint();
         });
-        animationTimer.start();
-        
-        // add key listener
+        gameTimer.start();
+    }
+
+    private void setupKeyListener() {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 keyState[e.getKeyCode()] = true;
+                
+                // 스페이스바 이벤트를 별도로 처리
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    spawnNewCustomer();
+                    System.out.println("Customer spawned!");  // 디버깅용
+                }
             }
             
             @Override
             public void keyReleased(KeyEvent e) {
                 keyState[e.getKeyCode()] = false;
             }
-
         });
+    }
 
-        Timer gameTimer = new Timer(16, e -> {  // 약 60FPS
-            updatePlayerMovement();
-            playerRenderer.update();
-            gamePanel.repaint();
-        });
-        gameTimer.start();
+    private void updateCustomers() {
+        for (Customer customer : customers) {
+            customer.update();
+        }
+    }
+
+    private void spawnNewCustomer() {
+        int spawnX = random.nextInt(600) + 100; // 100 ~ 700 사이
         
-        add(gamePanel);
-        setFocusable(true);
+        Customer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
+            private double currentY = CUSTOMER_SPAWN_Y;
+            private static final double MOVE_SPEED = 2.0;
+            
+            @Override
+            public void update() {
+                if (currentY > CUSTOMER_TARGET_Y) {
+                    currentY -= MOVE_SPEED;
+                    y = (int) currentY;
+                    
+                    facing = Direction.UP;
+                    isMoving = true;
+                } else {
+                    isMoving = false;
+                    facing = Direction.DOWN;
+                    y = CUSTOMER_TARGET_Y;
+                }
+                
+                super.update();
+            }
+        };
+        
+        customers.add(newCustomer);
+        System.out.println("New customer added at position: " + spawnX + ", " + CUSTOMER_SPAWN_Y);  // 디버깅용
     }
 
     private void updatePlayerMovement() {

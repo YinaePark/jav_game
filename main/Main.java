@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Player player = new Player(100);
+        Player player = new Player(20);
         Farm farm = new Farm();
         CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
