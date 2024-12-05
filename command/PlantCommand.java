@@ -1,8 +1,12 @@
 package command;
+import domain.item.Item;
+import domain.item.crops.*;
 import game.tile.FarmTile;
 import domain.Farm;
 import domain.item.HarvestItem;
 import domain.player.Player;
+import game.ui.GamePanel;
+
 import javax.swing.JOptionPane;
 
 public class PlantCommand implements Command {
@@ -10,21 +14,38 @@ public class PlantCommand implements Command {
     private Farm farm;
     private final FarmTile tile;
     private final String cropType;
+    private GamePanel gamePanel; // GamePanel 참조 추가
 
-    public PlantCommand(Player player, Farm farm, FarmTile tile, String cropType) {
+
+    public PlantCommand(Player player, Farm farm, FarmTile tile, String cropType, GamePanel gamePanel) {
         this.player = player;
         this.farm = farm;
         this.tile = tile;
         this.cropType = cropType;
-    }
+        this.gamePanel = gamePanel; // GamePanel 초기화
 
+    }
     @Override
     public void execute(String[] args) {
         if (!tile.isTilled() || tile.hasCrop()) {
-            JOptionPane.showMessageDialog(null, 
-                "Cannot plant here. Make sure the tile is tilled and empty.",
-                "Planting Error",
-                JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "Cannot plant here. Make sure the tile is tilled and empty.",
+                    "Planting Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 인벤토리에서 선택한 작물 검색
+        Item selectedItem = player.getInventory().stream()
+                .filter(item -> item.getName().equalsIgnoreCase(cropType))
+                .findFirst()
+                .orElse(null);
+
+        if (selectedItem == null) {
+            JOptionPane.showMessageDialog(null,
+                    "You don't have enough " + cropType + " seeds to plant!",
+                    "Insufficient Seeds",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -32,41 +53,52 @@ public class PlantCommand implements Command {
         HarvestItem crop = createCrop(cropType);
         if (crop == null) {
             JOptionPane.showMessageDialog(null,
-                "Invalid crop type: " + cropType,
-                "Invalid Crop",
-                JOptionPane.ERROR_MESSAGE);
+                    "Invalid crop type: " + cropType,
+                    "Invalid Crop",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // 비용 확인 및 처리 -- 상점에서 씨앗이나 작물을 구매할 때 돈을 차감하는거 아닌가 해서?!?! 주석처리 ㅎ
-        // double plantingCost = crop.getPrice();
-        // if (!player.spendMoney(plantingCost)) {
-        //     JOptionPane.showMessageDialog(null,
-        //         "Not enough money to plant " + cropType + "\nRequired: $" + plantingCost,
-        //         "Insufficient Funds",
-        //         JOptionPane.ERROR_MESSAGE);
-        //     return;
-        // }
+        // 인벤토리에서 작물 제거
+        if (!player.removeItem(cropType)) {
+            JOptionPane.showMessageDialog(null,
+                    "You don't have enough " + cropType + " seeds to plant!",
+                    "Insufficient Seeds",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
 
         // 작물 심기
         tile.setCrop(crop);
         farm.plantCrop(crop);
+
+        // InventoryPanel 갱신
+        if (gamePanel != null && gamePanel.getInventoryPanel() != null) {
+            gamePanel.getInventoryPanel().updateInventory(player.getInventory());
+        }
+
+        JOptionPane.showMessageDialog(null,
+                "Successfully planted " + cropType + "!",
+                "Planting Success",
+                JOptionPane.INFORMATION_MESSAGE);
     }
+
 
     private HarvestItem createCrop(String cropName) {
         switch (cropName.toLowerCase()) {
             case "onion":
-                return new HarvestItem("Onion", 2, 5); // 가격 2, 성장 시간 5
+                return new Onion(); // Onion 클래스 반환
             case "olive":
-                return new HarvestItem("Olive", 3, 15);  
+                return new Olive(); // Olive 클래스 반환
             case "tomato":
-                return new HarvestItem("Tomato", 2, 10);
+                return new Tomato(); // Tomato 클래스 반환
             case "lettuce":
-                return new HarvestItem("Lettuce", 2, 3);
+                return new Lettuce(); // Lettuce 클래스 반환
             case "wheat":
-                return new HarvestItem("Wheat", 4, 4);
+                return new Wheat(); // Wheat 클래스 반환
             case "truffle":
-                return new HarvestItem("Truffle", 20, 600);        
+                return new Truffle(); // Truffle 클래스 반환
             default:
                 return null; // 알 수 없는 작물 이름 처리
         }

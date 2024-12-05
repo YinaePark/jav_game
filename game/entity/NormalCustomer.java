@@ -79,14 +79,16 @@ public class NormalCustomer extends Customer {
         this.currentWaitingTime = 0;
         this.satisfactionLevel = 5;
 
-        // choose 3 random menus
-        Random random = new Random();
-        orderedMenus = new ArrayList<>();
-        // available menus
-        String[] availableMenus = {"onion soup", "salad", "tomato pasta", "sandwich", "steak", "escargot", "hamburger", "carbonara pasta", "cream gnocchi", "truffle pasta"};
+        // RecipeManager에서 레시피 목록 가져오기
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        List<String> availableMenus = new ArrayList<>(recipeManager.getAllRecipeNames());
 
-        while (orderedMenus.size() < 3) {
-            String menu = availableMenus[random.nextInt(availableMenus.length)];
+        orderedMenus = new ArrayList<>();
+        Random random = new Random();
+
+        // 3개의 랜덤 메뉴 선택
+        while (orderedMenus.size() < 3 && !availableMenus.isEmpty()) {
+            String menu = availableMenus.get(random.nextInt(availableMenus.size()));
             if (!orderedMenus.contains(menu)) {
                 orderedMenus.add(menu);
             }

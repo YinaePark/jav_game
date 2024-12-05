@@ -1,6 +1,6 @@
 package domain.item;
 
-public class ShopItem extends Item implements Sellable {
+public class ShopItem extends Item implements Purchasable {
     private double price;
 
     public ShopItem(String name, double price) {

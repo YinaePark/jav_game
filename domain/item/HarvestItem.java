@@ -1,6 +1,6 @@
 package domain.item;
 
-public class HarvestItem extends Item implements Growable, Sellable {
+public class HarvestItem extends Item implements Growable, Purchasable {
     private double price; // 판매 가격
     private int growthTime; // 총 성장 시간 (시간 단위)
     private long plantedTimestamp; // 심은 시점의 타임스탬프 (밀리초 단위)

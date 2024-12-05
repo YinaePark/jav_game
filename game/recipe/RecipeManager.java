@@ -1,10 +1,6 @@
 package game.recipe;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 
 public class RecipeManager {
     private static RecipeManager instance;
@@ -21,12 +17,24 @@ public class RecipeManager {
         }
         return instance;
     }
+    public List<Recipe> getRandomRecipes(int count) {
+        List<Recipe> allRecipes = new ArrayList<>(recipes.values()); // 모든 레시피 가져오기
+        List<Recipe> randomRecipes = new ArrayList<>();
+        Random random = new Random();
+
+        while (randomRecipes.size() < count && !allRecipes.isEmpty()) {
+            int index = random.nextInt(allRecipes.size());
+            randomRecipes.add(allRecipes.remove(index)); // 선택된 레시피 추가 후 제거
+        }
+
+        return randomRecipes;
+    }
 
     private void initializeRecipes() {
         // 3 ingredients recipes
-        addRecipe("onion soup", Arrays.asList("onion", "cheese", "butter"), 6);
+        addRecipe("onion_soup", Arrays.asList("onion", "cheese", "butter"), 6);
         addRecipe("salad", Arrays.asList("lettuce", "tomato", "olive"), 5);
-        addRecipe("tomato pasta", Arrays.asList("wheat", "tomato", "meat"), 9);
+        addRecipe("tomato_pasta", Arrays.asList("wheat", "tomato", "meat"), 9);
         addRecipe("sandwich", Arrays.asList("wheat", "lettuce", "tomato"), 7);
         addRecipe("steak", Arrays.asList("meat", "onion", "butter"), 10);
         addRecipe("escargot", Arrays.asList("snail", "onion", "butter"), 11);
@@ -35,9 +43,9 @@ public class RecipeManager {
         addRecipe("hamburger", Arrays.asList("meat", "wheat", "lettuce", "tomato"), 9);
 
         // 5 ingredients recipes
-        addRecipe("carbonara pasta", Arrays.asList("wheat", "egg", "cheese", "meat", "onion"), 11);
-        addRecipe("cream gnocchi", Arrays.asList("wheat", "milk", "potato", "butter", "cheese"), 12);
-        addRecipe("truffle pasta", Arrays.asList("truffle", "cheese", "milk", "butter", "wheat"), 16);
+        addRecipe("carbonara_pasta", Arrays.asList("wheat", "egg", "cheese", "meat", "onion"), 11);
+        addRecipe("cream_gnocchi", Arrays.asList("wheat", "milk", "potato", "butter", "cheese"), 12);
+        addRecipe("truffle_pasta", Arrays.asList("truffle", "cheese", "milk", "butter", "wheat"), 16);
     }
 
     private void addRecipe(String name, List<String> ingredients, int baseReward) {
@@ -73,5 +81,9 @@ public class RecipeManager {
             }
         }
         return result;
+    }
+
+    public List<String> getAllRecipeNames() {
+        return new ArrayList<>(recipes.keySet());
     }
 }

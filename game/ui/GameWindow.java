@@ -14,6 +14,8 @@ import domain.player.Player;
 import game.entity.PlayerRenderer;
 import game.entity.Customer;
 import game.entity.NormalCustomer;
+import game.recipe.Recipe;
+import game.recipe.RecipeManager;
 
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
@@ -22,9 +24,12 @@ public class GameWindow extends JFrame {
     private Farm farm;
     private boolean[] keyState = new boolean[256];
     private InventoryPanel inventoryPanel;
+    private ShopPanel shopPanel;
     private JPanel mainContainer;
+    private JPanel rightPanel;  // 오른쪽에 두 패널을 배치할 새로운 JPanel
     private boolean isInventoryVisible = false;
-    
+    private boolean isShopVisible = false;
+
     private List<Customer> customers;
     private static final int CUSTOMER_SPAWN_Y = 600;
     private static final int CUSTOMER_TARGET_Y = 300;
@@ -56,7 +61,19 @@ public class GameWindow extends JFrame {
         inventoryPanel.setPreferredSize(new Dimension(300, 600));  // 고정된 높이 설정
         inventoryPanel.setVisible(false);
         mainContainer.add(inventoryPanel, BorderLayout.EAST);
-    
+
+        shopPanel = new ShopPanel(player, gamePanel);  // ShopPanel 생성
+        shopPanel.setPreferredSize(new Dimension(300, 600));  // 샵 크기 설정
+        shopPanel.setVisible(false);
+// 오른쪽 패널을 생성하고, BoxLayout을 사용하여 두 패널을 세로로 배치
+        rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.add(inventoryPanel);
+        rightPanel.add(shopPanel);
+
+
+        mainContainer.add(rightPanel, BorderLayout.EAST);  // 샵 패널 추가
+
         setContentPane(mainContainer);
         
         setupTimers();
@@ -68,7 +85,7 @@ public class GameWindow extends JFrame {
 
     public void updateInventoryIfNeeded() {
         if (isInventoryVisible && inventoryPanel != null) {
-            inventoryPanel.updateInventory();
+            inventoryPanel.updateInventory(player.getInventory());
             inventoryPanel.repaint();
         }
     }
@@ -78,12 +95,39 @@ public class GameWindow extends JFrame {
         inventoryPanel.setVisible(isInventoryVisible);
         if (isInventoryVisible) {
             setSize(1100, 600);  // 인벤토리가 보일 때 크기
-            inventoryPanel.updateInventory();
+            updateInventoryIfNeeded();  // 인벤토리 상태 업데이트
         } else {
             setSize(800, 600);  // 인벤토리가 숨겨질 때 크기
         }
+        // shopPanel이 보이고 있다면 이를 숨깁니다.
+        if (shopPanel.isVisible()) {
+            shopPanel.setVisible(false);
+        }
         gamePanel.requestFocus();
     }
+    private void toggleShop() {
+        // ShopPanel 토글
+        if (shopPanel != null) {
+            isShopVisible = !isShopVisible;
+            shopPanel.setVisible(isShopVisible);  // 패널의 가시성을 변경
+
+            // 창 크기 조정
+            if (isShopVisible) {
+                setSize(1100, 600);  // 샵이 보일 때 크기
+            } else {
+                setSize(800, 600);  // 샵이 숨겨질 때 크기
+            }
+            // inventoryPanel이 보이고 있다면 이를 숨깁니다.
+            if (inventoryPanel.isVisible()) {
+                inventoryPanel.setVisible(false);
+            }
+            // 레이아웃 갱신 및 패널 그리기
+            mainContainer.revalidate();
+            mainContainer.repaint();
+        }
+        gamePanel.requestFocus();
+    }
+
 
     private void setupTimers() {
         // 게임 타이머
@@ -116,6 +160,10 @@ public class GameWindow extends JFrame {
                 // I 키 처리
                 if (e.getKeyCode() == KeyEvent.VK_I) {
                     toggleInventory();
+                }
+                // O 키 처리
+                if (e.getKeyCode() == KeyEvent.VK_O) {
+                    toggleShop();  // O 키로 샵 토글
                 }
             }
             
@@ -158,21 +206,20 @@ public class GameWindow extends JFrame {
 
         }
     }
-
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(200) + 100; // 100 ~ 300 사이
-        
-        Customer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
+        int spawnX = random.nextInt(600) + 100; // 고객의 X 좌표 (100 ~ 700 사이)
+
+        // NormalCustomer 생성
+        NormalCustomer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
             private double currentY = CUSTOMER_SPAWN_Y;
             private static final double MOVE_SPEED = 2.0;
-            private long spawnTime;
 
             @Override
             public void update() {
                 if (currentY > CUSTOMER_TARGET_Y) {
                     currentY -= MOVE_SPEED;
                     y = (int) currentY;
-                    
+
                     facing = Direction.UP;
                     isMoving = true;
                 } else {
@@ -180,7 +227,7 @@ public class GameWindow extends JFrame {
                     facing = Direction.DOWN;
                     y = CUSTOMER_TARGET_Y;
                 }
-                
+
                 super.update();
                 if (spawnTime == 0){
                     spawnTime = System.currentTimeMillis(); // 손님 등장 시간 기록
@@ -198,11 +245,18 @@ public class GameWindow extends JFrame {
                 return false;
             }
         };
-        
+
+        // 초기화 중 3개의 레시피 할당
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        List<Recipe> recipes = recipeManager.getRandomRecipes(3); // 랜덤으로 3개 선택
+        newCustomer.assignRecipes(recipes); // 고객에게 레시피 할당
+
+        // 고객을 리스트에 추가
         customers.add(newCustomer);
         isCustomerPresent = true;
         System.out.println("New customer added at position: " + spawnX + ", " + CUSTOMER_SPAWN_Y);  // 디버깅용
     }
+
 
     private void updatePlayerMovement() {
         int dx = 0;
