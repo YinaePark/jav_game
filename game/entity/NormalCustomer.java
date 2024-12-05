@@ -36,6 +36,7 @@ public class NormalCustomer extends Customer {
 
     }
 
+
     @Override
     protected void loadSprites() {
         try {

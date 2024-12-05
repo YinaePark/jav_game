@@ -21,11 +21,13 @@ public abstract class Customer {
     protected boolean facingLeft = true;
     protected boolean isMoving = false;
     protected long spawnTime;  // 고객이 생성된 시간
+    protected long remainingTime; // 남은 시간
 
     protected List<String> orderedMenus;  // menu list
     protected int satisfactionLevel;      // satisfaction level(0~5)
     protected int maxWaitingTime;         // maximum waiting time
     protected int currentWaitingTime;     // current waiting time
+
     public boolean isWaitingTooLong() {
         return currentWaitingTime >= maxWaitingTime;
     }
@@ -45,8 +47,14 @@ public abstract class Customer {
         this.spawnTime = System.currentTimeMillis();  // 고객이 생성된 시간
         this.assignedRecipes = null; // 초기에는 null
         this.satisfactionLevel = 5;  // initial satisfaction level
+        this.maxWaitingTime = 30000;
         loadSprites();
         initializeCustomer();
+    }
+
+    public long getRemainingTime(){
+        remainingTime = maxWaitingTime - (System.currentTimeMillis() - spawnTime);
+        return remainingTime > 0 ? remainingTime : 0; // 0이하로 가지 않게 처리
     }
 
 
@@ -69,9 +77,8 @@ public abstract class Customer {
     
     public void update() {
         if (isWaiting) {
-            currentWaitingTime++;
-            if (currentWaitingTime >= maxWaitingTime/3) {
-                System.out.println("Customer feels angry.... hurry up!!");
+            currentWaitingTime = (int)(System.currentTimeMillis() - spawnTime);
+            if (currentWaitingTime >= maxWaitingTime) {
                 decreaseSatisfaction();
             }
         }
@@ -119,8 +126,24 @@ public abstract class Customer {
             g.setColor(Color.BLUE);
             g.fillRect(x, y, SIZE, SIZE);
         }
+        long remainingTimeInSeconds = getRemainingTime() / 1000;
+        String timeText = String.format("%d s", remainingTimeInSeconds);
+
+        int textX = x + SIZE / 2 - 15; // 고객의 중앙 위치
+        int textY = y - 10;
+
+        // 동그라미 그리기
+        int circleRadius = 15; // 동그라미 반지름
+        g.setColor(Color.BLACK); // 동그라미 색상
+        g.fillOval(textX, textY-20, circleRadius * 2, circleRadius * 2); // 동그라미 배경
+        if (remainingTimeInSeconds > 10) {
+            g.setColor(Color.WHITE);
+        }
+        else {g.setColor(Color.RED);}
+        g.drawString(timeText, textX , textY);
+        return;
     }
-    
+
     protected void decreaseSatisfaction() {
         if (satisfactionLevel > 0) {
             satisfactionLevel--;

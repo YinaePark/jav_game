@@ -188,6 +188,8 @@ public class GameWindow extends JFrame {
                 customers.remove(i);
                 System.out.println("A customer has left due to waiting too long.");
                 i--; // list index modify
+                isCustomerPresent = false;
+                startCustomerCooldown();
             }
 
             //고객이 주문을 완료했을 때
@@ -197,17 +199,29 @@ public class GameWindow extends JFrame {
                 isCustomerPresent = false;
                 System.out.println("Order complete. Customer left.");
                 i--;
+                startCustomerCooldown();
             }
         }
 
-        // 게임 안내: 고객 수가 3명이 되면 안내
+        // 게임 안내: 완료한 고객 수가 3명이 되면 안내
         if (customerCount>=3) {
             System.out.println("3 customers served.");
 
         }
     }
+
+    private void startCustomerCooldown() {
+        Timer cooldownTimer = new Timer (10000, e -> {
+            if (!isCustomerPresent){
+                spawnNewCustomer();
+            }
+        });
+        cooldownTimer.setRepeats(false);
+        cooldownTimer.start();
+    }
+
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(600) + 100; // 고객의 X 좌표 (100 ~ 700 사이)
+        int spawnX = random.nextInt(180) + 70; // 고객의 X 좌표 (100 ~ 700 사이)
 
         // NormalCustomer 생성
         NormalCustomer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
