@@ -6,6 +6,7 @@ import domain.Farm;
 import domain.item.Item;
 import domain.player.Player;
 import game.entity.Customer;
+import game.entity.NormalCustomer;
 import game.entity.PlayerRenderer;
 import game.recipe.Recipe;
 import game.recipe.RecipeManager;
@@ -436,7 +437,7 @@ public class GamePanel extends JPanel {
 
     private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
         // IngredientSelectionDialog 생성 (Player와 연결)
-        IngredientSelectionDialog ingredientSelectionDialog = new IngredientSelectionDialog(gameWindow, player);
+        IngredientSelectionDialog ingredientSelectionDialog = new IngredientSelectionDialog(gameWindow, player, (NormalCustomer) customer);
 
         // 다이얼로그 표시
         ingredientSelectionDialog.setVisible(true);

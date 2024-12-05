@@ -1,11 +1,13 @@
 package game.ui;
-
+import game.entity.NormalCustomer;
 import domain.item.Item;
 import domain.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IngredientSelectionDialog extends JDialog {
     public static final int MAX_INGREDIENTS = 5;  // 최대 재료 개수
@@ -14,12 +16,42 @@ public class IngredientSelectionDialog extends JDialog {
     private Item[] selectedIngredients;
     private JPanel ingredientSlotsPanel;
     private ActionListener submitListener;
+    private NormalCustomer normalCustomer;
 
-    public IngredientSelectionDialog(Frame owner, Player player) {
+    public IngredientSelectionDialog(Frame owner, Player player,NormalCustomer normalCustomer) {
         super(owner, "Select Ingredients", true);  // Modal로 띄운다.
         this.player = player;
+        this.normalCustomer = normalCustomer;
         this.selectedIngredients = new Item[MAX_INGREDIENTS];
         initialize();
+    }
+
+    private void onSubmitButtonClicked() {
+        // NormalCustomer에서 사용될 플레이어 객체와 선택된 재료들을 전달
+        if (player != null && selectedIngredients != null) {
+            // Customer 객체를 생성하고, 만족도를 계산
+            List<String> selectedIngredientNames = new ArrayList<>();
+            for (Item ingredient : selectedIngredients) {
+                if (ingredient != null) {
+                    selectedIngredientNames.add(ingredient.getName());
+                }
+            }
+
+            // 만족도 업데이트
+            normalCustomer.updateSatisfaction(selectedIngredientNames);
+
+            // 보상 계산
+            int reward = normalCustomer.calculateReward();
+
+            // 보상 지급
+            player.earnMoney(reward);  // player.addMoney는 플레이어 클래스에서 보상을 추가하는 메서드
+
+            // 결과 메시지 표시
+            JOptionPane.showMessageDialog(this, "You have earned " + reward + " money!");
+        }
+
+        // 대화 상자 닫기
+        dispose();
     }
 
     private void initialize() {
@@ -49,11 +81,7 @@ public class IngredientSelectionDialog extends JDialog {
 
         // 제출 버튼
         JButton submitButton = new JButton("Submit");
-        submitButton.addActionListener(e -> {
-            if (submitListener != null) {
-                submitListener.actionPerformed(e);
-            }
-        });
+        submitButton.addActionListener(e -> onSubmitButtonClicked());  // onSubmitButtonClicked를 직접 호출
         add(submitButton, BorderLayout.NORTH);
 
         setSize(400, 500);  // 창 크기 조정
