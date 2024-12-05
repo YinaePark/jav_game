@@ -3,6 +3,7 @@ package game.entity;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import game.recipe.Recipe;
 import game.recipe.RecipeManager;
 
 import java.io.File;
@@ -65,7 +66,7 @@ public class NormalCustomer extends Customer {
         Random random = new Random();
         orderedMenus = new ArrayList<>();
         // available menus
-        String[] availableMenus = {"onion soup", "salad", "tomato pasta", "sandwich", "steak", "escargot"};
+        String[] availableMenus = {"onion soup", "salad", "tomato pasta", "sandwich", "steak", "escargot", "hamburger", "carbonara pasta", "cream gnocchi", "truffle pasta"};
         
         while (orderedMenus.size() < 3) {
             String menu = availableMenus[random.nextInt(availableMenus.length)];
@@ -76,26 +77,88 @@ public class NormalCustomer extends Customer {
     }
     
     @Override
-    protected void updateSatisfaction(int correctIngredients) {
-        // need to implement
+    protected void updateSatisfaction(List<String> ingredients) {
+        // RecipeManager에서 레시피의 상세 정보 가져오기
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        
+        // 주문한 메뉴 중 첫 번째 메뉴의 평가
+        String menu = orderedMenus.get(0);
+        Recipe recipe = recipeManager.getRecipe(menu);
+        
+        if (recipe == null) {
+            satisfactionLevel = 0;
+            return;
+        }
+        
+        List<String> recipeIngredients = recipe.getIngredients();
+        
+        // 첫 번째 기준: 주재료 확인 (50점)
+        String mainIngredient = recipeIngredients.get(0);
+        int score = userIngredientContainsMainIngredient(mainIngredient, ingredients) ? 50 : 0;
+        
+        // 두 번째 기준: 재료 개수 차이 (-10점씩)
+        int ingredientDifference = Math.abs(recipeIngredients.size() - ingredients.size());
+        score -= ingredientDifference * 10;
+        
+        // 세 번째 기준: 주재료 제외한 재료 일치율 (50점)
+        int additionalIngredientMatch = calculateAdditionalIngredientsMatch(recipeIngredients, ingredients);
+        score += additionalIngredientMatch * 50;
+        
+        // 점수 0 이하일 경우 0으로 설정
+        score = Math.max(0, Math.min(score, 100));
+        
+        // 만족도 수준으로 변환 (0~5)
+        satisfactionLevel = score / 20;
+
     }
     
     @Override
     protected int calculateReward() {
-        // calculate reward based on satisfaction level
-        double reward = BASE_REWARD * (satisfactionLevel * SATISFACTION_MULTIPLIER);
+        // RecipeManager에서 레시피의 상세 정보 가져오기
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        String menu = orderedMenus.get(0);
+        Recipe recipe = recipeManager.getRecipe(menu);
         
-        // if satisfaction level is 1 or lower, penalize the reward
-        if (satisfactionLevel <= 1) {
-            reward = -BASE_REWARD;  // lose money
+        if (recipe == null) {
+            return 0;
         }
         
-        return (int) reward;
+        // 레시피의 기본 보상값
+        int baseReward = recipe.getBaseReward();
+        
+        // 만족도 점수 계산: (만족도**2 - 100) 
+        double satisfactionScore = Math.pow(satisfactionLevel * 20, 2) - 100;
+        
+        // 최종 보상 계산
+        double reward = baseReward * (satisfactionScore / 100);
+        
+        // 만족도가 낮으면 음수 보상
+        if (satisfactionLevel <= 1) {
+            reward = -BASE_REWARD;
     }
     
-    @Override
-    protected int checkIngredients(String menu, List<String> ingredients) {
-        RecipeManager recipeManager = RecipeManager.getInstance();
-        return recipeManager.checkIngredients(menu, ingredients);
+    return (int) reward;
+
+}
+
+// 주재료 포함 여부 확인
+private boolean userIngredientContainsMainIngredient(String mainIngredient, List<String> ingredients) {
+    return ingredients.contains(mainIngredient);
+}
+
+// 주재료 제외한 재료 일치율 계산
+private int calculateAdditionalIngredientsMatch(List<String> recipeIngredients, List<String> userIngredients) {
+    // 주재료 제외
+    List<String> additionalRecipeIngredients = recipeIngredients.subList(1, recipeIngredients.size());
+    
+    int matchCount = 0;
+    for (String ingredient : additionalRecipeIngredients) {
+        if (userIngredients.contains(ingredient)) {
+            matchCount++;
+        }
     }
+    
+    // 일치율 계산 (소수점 반올림)
+    return (int) Math.round((double) matchCount / (additionalRecipeIngredients.size()));
+}
 }

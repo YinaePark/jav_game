@@ -44,7 +44,7 @@ public abstract class Customer {
     // abstract methods
     protected abstract void loadSprites();  // load sprites for customer
     protected abstract void initializeCustomer();
-    protected abstract void updateSatisfaction(int correctIngredients);
+    protected abstract void updateSatisfaction(List<String> ingredients);
     protected abstract int calculateReward();
     
     public void update() {
@@ -111,14 +111,9 @@ public abstract class Customer {
             return -1;
         }
         
-        int correctIngredients = checkIngredients(menu, ingredients);
-        updateSatisfaction(correctIngredients);
+        updateSatisfaction(ingredients);
         
         return calculateReward();
-    }
-    
-    protected int checkIngredients(String menu, List<String> ingredients) {
-        return 0; 
     }
     
     // Getter/Setter
