@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class NormalCustomer extends Customer {
-    private static final int MAX_WAITING_MINUTES = 300;  // 5min
+    private static final int MAX_WAITING_MINUTES = 30000;  // 5min
     private static final int BASE_REWARD = 100;         // base reward
     private static final double SATISFACTION_MULTIPLIER = 1.2; // satisfaction multiplier
     private Random random;
