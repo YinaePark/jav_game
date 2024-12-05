@@ -103,7 +103,9 @@ public class InventoryPanel extends JPanel {
                         selectedItem = slots[i][j].getItem();
 
                         // GamePanel에 선택된 아이템 정보 전달
-                        gamePanel.setSelectedItem(selectedItem);
+                        if(gamePanel != null){
+                            gamePanel.setSelectedItem(selectedItem);
+                        }
 
                         repaint();
                         return;

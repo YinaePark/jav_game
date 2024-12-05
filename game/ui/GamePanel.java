@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -377,7 +376,6 @@ public class GamePanel extends JPanel {
         if (customer == null) {
             return; // 고객이 없다면 처리 종료
         }
-
         // 2. 요리 선택 다이얼로그 표시
         showDishSelectionDialog(customer);
     }
@@ -391,14 +389,13 @@ public class GamePanel extends JPanel {
         return null; // 클릭된 위치에 고객이 없을 경우
     }
 
-
     private void showDishSelectionDialog(Customer customer) {
         List<Recipe> customerRecipes = customer.getAssignedRecipes();
 
-        // ChoiceDishPanel 생성
+        // ChoiceDishPanel 생성 
         JPanel panel = new JPanel(new BorderLayout());
         ChoiceDishPanel choiceDishPanel = new ChoiceDishPanel(customerRecipes, selectedDish -> {
-//            serveDishToCustomer(selectedDish, customer); // 요리 제공 처리
+            serveDishToCustomer(selectedDish, customer);
             ((JDialog) SwingUtilities.getWindowAncestor(panel)).dispose(); // 다이얼로그 닫기
         });
 
@@ -411,6 +408,87 @@ public class GamePanel extends JPanel {
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
+    }
+
+    // 플레이어의 인벤토리에서 사용할 수 있는 재료를 가져오는 메서드
+    private List<String> getPlayerIngredients() {
+        List<String> playerIngredients = new ArrayList<>();
+        // 플레이어의 인벤토리에서 재료 목록을 추가
+        for (Item item : player.getInventory()) {
+            playerIngredients.add(item.getName());
+
+        }
+        return playerIngredients;
+    }
+
+
+    private void serveDishToCustomer(String selectedDish, Customer customer) {
+        // 선택한 레시피에 대해 재료 선택 다이얼로그 띄우기
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        Recipe selectedRecipe = recipeManager.getRecipe(selectedDish);
+        if (selectedRecipe == null) {
+            // 해당 이름에 맞는 레시피가 없을 경우 처리
+            System.out.println("Error: Recipe not found for " + selectedDish);
+            return;
+        }
+        showIngredientSelectionDialog(selectedRecipe, customer);
+    }
+
+    private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
+        // IngredientSelectionDialog 생성 (Player와 연결)
+        IngredientSelectionDialog ingredientSelectionDialog = new IngredientSelectionDialog(gameWindow, player);
+
+        // 다이얼로그 표시
+        ingredientSelectionDialog.setVisible(true);
+
+        // 제출 버튼 클릭 후 선택된 재료를 가져와서 처리
+        ingredientSelectionDialog.addSubmitListener(e -> {
+            // 선택된 재료 목록을 받아오기
+            List<String> selectedIngredients = new ArrayList<>();
+            for (int i = 0; i < IngredientSelectionDialog.MAX_INGREDIENTS; i++) {
+                Item ingredient = ingredientSelectionDialog.getSelectedIngredient(i);
+                if (ingredient != null) {
+                    selectedIngredients.add(ingredient.getName());
+                }
+            }
+
+            // 선택된 재료 확인 후, Dish를 평가하고 서버
+            evaluateAndServeDish(selectedIngredients, selectedDish, customer);
+        });
+    }
+
+    private void evaluateAndServeDish(List<String> selectedIngredients, Recipe selectedRecipe, Customer customer) {
+        // 1. 재료가 모두 있는지 확인
+        List<String> requiredIngredients = selectedRecipe.getIngredients();
+        boolean hasAllIngredients = true;
+
+        // 필요 재료와 선택한 재료 비교
+        for (String ingredient : requiredIngredients) {
+            if (!selectedIngredients.contains(ingredient)) {
+                hasAllIngredients = false;
+                break;
+            }
+        }
+
+        // 2. 재료가 모두 있는 경우, 요리를 제공하고 보상 지급
+        if (hasAllIngredients) {
+            customer.updateSatisfaction(selectedIngredients);
+            int reward = customer.calculateReward();
+            player.earnMoney(reward);
+
+            // 보상 다이얼로그 표시
+            JOptionPane.showMessageDialog(this,
+                    String.format("Dish Served! Satisfaction Level: %d\nReward: € %d",
+                            customer.getSatisfactionLevel(), reward),
+                    "Dish Serving Result",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // 재료가 부족한 경우
+            JOptionPane.showMessageDialog(this,
+                    "You do not have all the required ingredients!",
+                    "Missing Ingredients",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
 
 }
