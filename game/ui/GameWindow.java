@@ -90,6 +90,10 @@ public class GameWindow extends JFrame {
             gamePanel.repaint();
         });
         gameTimer.start();
+
+        // 고객 스폰 타이머
+        Timer customerSpawnTimer = new Timer(3000, e -> spawnNewCustomer());
+        customerSpawnTimer.start();
     }
 
     private void setupKeyListener() {
@@ -125,7 +129,7 @@ public class GameWindow extends JFrame {
     }
 
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(600) + 100; // 100 ~ 700 사이
+        int spawnX = random.nextInt(600) + 100; // 100 ~ 700 사이 
         
         Customer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
             private double currentY = CUSTOMER_SPAWN_Y;
