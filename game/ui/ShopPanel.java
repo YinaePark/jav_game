@@ -1,13 +1,12 @@
 package game.ui;
 
 import domain.item.Item;
-import domain.item.ItemManager;
+import domain.item.ShopItemManager;
 import domain.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 import java.util.List;
 
 public class ShopPanel extends JPanel {
@@ -28,7 +27,7 @@ public class ShopPanel extends JPanel {
         setPreferredSize(new Dimension(300, 300));
         initializeSlots();
         addMouseListener(new ShopMouseListener());
-        updateShop(ItemManager.getAllItems());
+        updateShop(ShopItemManager.getAllItems());
 
     }
 

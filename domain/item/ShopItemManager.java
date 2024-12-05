@@ -2,7 +2,7 @@ package domain.item;
 
 import java.util.*;
 
-public class ItemManager {
+public class ShopItemManager {
     private static List<Item> allItems = new ArrayList<>();
 
     static {
