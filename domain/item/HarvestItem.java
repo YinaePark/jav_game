@@ -1,10 +1,10 @@
 package domain.item;
 
 public class HarvestItem extends Item implements Growable, Purchasable {
-    private double price; // 판매 가격
-    private int growthTime; // 총 성장 시간 (시간 단위)
+    private double price; // price when player buy item from shop
+    private int growthTime; // total growth time
     private long plantedTimestamp; // 심은 시점의 타임스탬프 (밀리초 단위)
-    private boolean isHarvested; // 수확 여부
+    private boolean isHarvested;
 
     public HarvestItem(String name, double price, int growthTime) {
         super(name);
@@ -37,25 +37,12 @@ public class HarvestItem extends Item implements Growable, Purchasable {
         }
     }
 
-    // Sellable 인터페이스 구현
-    @Override
-    public double calculateSellPrice() {
-        return price;
-    }
-
+    // Sellable
     @Override
     public double getPrice() {
         return price;
     }
 
-    @Override
-    public void useInDish() {
-        if (isHarvested) {
-            System.out.println(getName() + " is used in the dish.");
-        } else {
-            System.out.println(getName() + " cannot be used, it needs to be harvested first.");
-        }
-    }
 
     // 심은 이후 경과 시간을 반환
     private int getTimeElapsed() {
@@ -70,7 +57,6 @@ public class HarvestItem extends Item implements Growable, Purchasable {
     // 성장 진행 상태 반환
     public int getGrowthProgress() {
         int elapsed = getTimeElapsed();
-        // System.out.println("growthTime : "+this.growthTime);
         return (int) ((double) elapsed / this.growthTime * 100);
     }
 

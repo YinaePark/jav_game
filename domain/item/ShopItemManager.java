@@ -10,7 +10,7 @@ public class ShopItemManager {
     public ShopItemManager() {
         this.allItems = new ArrayList<>();
         initializeItems();
-    }    // 상점에 판매할 아이템들을 초기화합니다.
+    }
     private static void initializeItems() {
         allItems.add(new Olive());
         allItems.add(new Lettuce());
@@ -23,11 +23,7 @@ public class ShopItemManager {
         allItems.add(new Milk());
         allItems.add(new Snail());
 
-
-
     }
-
-
     public static List<Item> getAllItems() {
         initializeItems();
         return allItems;
