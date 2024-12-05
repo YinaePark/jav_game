@@ -14,6 +14,8 @@ import domain.player.Player;
 import game.entity.PlayerRenderer;
 import game.entity.Customer;
 import game.entity.NormalCustomer;
+import game.recipe.Recipe;
+import game.recipe.RecipeManager;
 
 public class GameWindow extends JFrame {
     private GamePanel gamePanel;
@@ -204,21 +206,20 @@ public class GameWindow extends JFrame {
 
         }
     }
-
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(200) + 100; // 100 ~ 300 사이
-        
-        Customer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
+        int spawnX = random.nextInt(600) + 100; // 고객의 X 좌표 (100 ~ 700 사이)
+
+        // NormalCustomer 생성
+        NormalCustomer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
             private double currentY = CUSTOMER_SPAWN_Y;
             private static final double MOVE_SPEED = 2.0;
-            private long spawnTime;
 
             @Override
             public void update() {
                 if (currentY > CUSTOMER_TARGET_Y) {
                     currentY -= MOVE_SPEED;
                     y = (int) currentY;
-                    
+
                     facing = Direction.UP;
                     isMoving = true;
                 } else {
@@ -226,7 +227,7 @@ public class GameWindow extends JFrame {
                     facing = Direction.DOWN;
                     y = CUSTOMER_TARGET_Y;
                 }
-                
+
                 super.update();
                 if (spawnTime == 0){
                     spawnTime = System.currentTimeMillis(); // 손님 등장 시간 기록
@@ -244,11 +245,18 @@ public class GameWindow extends JFrame {
                 return false;
             }
         };
-        
+
+        // 초기화 중 3개의 레시피 할당
+        RecipeManager recipeManager = RecipeManager.getInstance();
+        List<Recipe> recipes = recipeManager.getRandomRecipes(3); // 랜덤으로 3개 선택
+        newCustomer.assignRecipes(recipes); // 고객에게 레시피 할당
+
+        // 고객을 리스트에 추가
         customers.add(newCustomer);
         isCustomerPresent = true;
         System.out.println("New customer added at position: " + spawnX + ", " + CUSTOMER_SPAWN_Y);  // 디버깅용
     }
+
 
     private void updatePlayerMovement() {
         int dx = 0;

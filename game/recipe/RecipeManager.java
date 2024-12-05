@@ -1,10 +1,6 @@
 package game.recipe;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 
 public class RecipeManager {
     private static RecipeManager instance;
@@ -20,6 +16,18 @@ public class RecipeManager {
             instance = new RecipeManager();
         }
         return instance;
+    }
+    public List<Recipe> getRandomRecipes(int count) {
+        List<Recipe> allRecipes = new ArrayList<>(recipes.values()); // 모든 레시피 가져오기
+        List<Recipe> randomRecipes = new ArrayList<>();
+        Random random = new Random();
+
+        while (randomRecipes.size() < count && !allRecipes.isEmpty()) {
+            int index = random.nextInt(allRecipes.size());
+            randomRecipes.add(allRecipes.remove(index)); // 선택된 레시피 추가 후 제거
+        }
+
+        return randomRecipes;
     }
 
     private void initializeRecipes() {
@@ -73,5 +81,9 @@ public class RecipeManager {
             }
         }
         return result;
+    }
+
+    public List<String> getAllRecipeNames() {
+        return new ArrayList<>(recipes.keySet());
     }
 }

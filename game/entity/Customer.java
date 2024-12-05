@@ -46,6 +46,7 @@ public abstract class Customer {
         initializeCustomer();
     }
 
+
     public List<Recipe> getAssignedRecipes() {
         return assignedRecipes;
     }

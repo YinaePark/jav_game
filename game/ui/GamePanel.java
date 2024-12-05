@@ -380,12 +380,7 @@ public class GamePanel extends JPanel {
             return; // 고객이 없다면 처리 종료
         }
 
-        // 2. 고객에게 요리가 할당되지 않았으면 할당
-        if (!customer.hasAssignedRecipes()) {
-            assignRandomRecipesToCustomer(customer, 3); // 3개의 랜덤 요리 할당
-        }
-
-        // 3. 요리 선택 다이얼로그 표시
+        // 2. 요리 선택 다이얼로그 표시
         showDishSelectionDialog(customer);
     }
 
@@ -398,18 +393,6 @@ public class GamePanel extends JPanel {
         return null; // 클릭된 위치에 고객이 없을 경우
     }
 
-    private void assignRandomRecipesToCustomer(Customer customer, int count) {
-        List<Recipe> allRecipes = RecipeManager.getInstance().getRecipesByDifficulty(count); // 난이도 조건
-        Random rand = new Random();
-        List<Recipe> randomRecipes = new ArrayList<>();
-        while (randomRecipes.size() < count) {
-            Recipe randomRecipe = allRecipes.get(rand.nextInt(allRecipes.size()));
-            if (!randomRecipes.contains(randomRecipe)) {
-                randomRecipes.add(randomRecipe);
-            }
-        }
-        customer.assignRecipes(randomRecipes);
-    }
 
     private void showDishSelectionDialog(Customer customer) {
         List<Recipe> customerRecipes = customer.getAssignedRecipes();
