@@ -6,14 +6,14 @@ import java.awt.*;
 public class HelpCommand implements Command {
     @Override
     public void execute(String[] args) {
-        // 도움말 다이얼로그 생성
+        // Dialog generation
         JDialog helpDialog = new JDialog();
         helpDialog.setTitle("Game Help");
         helpDialog.setSize(400, 300);
         helpDialog.setLocationRelativeTo(null);
         helpDialog.setModal(true);
         
-        // 도움말 내용을 담을 텍스트 영역
+        // text area
         JTextArea helpText = new JTextArea();
         helpText.setEditable(false);
         helpText.setWrapStyleWord(true);
@@ -21,7 +21,7 @@ public class HelpCommand implements Command {
         helpText.setMargin(new Insets(10, 10, 10, 10));
         helpText.setFont(new Font("Arial", Font.PLAIN, 14));
         
-        // 도움말 내용
+        // content
         StringBuilder help = new StringBuilder();
         help.append("Game Controls:\n\n");
         help.append("Mouse Controls:\n");
@@ -41,20 +41,20 @@ public class HelpCommand implements Command {
         
         helpText.setText(help.toString());
         
-        // 스크롤 패널에 텍스트 영역 추가
+        // add text area to scroll panel
         JScrollPane scrollPane = new JScrollPane(helpText);
         helpDialog.add(scrollPane);
         
-        // 닫기 버튼
+        // close button
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> helpDialog.dispose());
         
-        // 버튼 패널
+        // button panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(closeButton);
         helpDialog.add(buttonPanel, BorderLayout.SOUTH);
         
-        // 다이얼로그 표시
+        // dialog visibliltiy
         helpDialog.setVisible(true);
     }
 }
