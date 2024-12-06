@@ -209,6 +209,16 @@ public class GameWindow extends JFrame {
 
         }
     }
+    public void removeCustomer(Customer customer) {
+        // 고객 리스트에서 제거
+        customers.remove(customer);
+
+        // 새로운 고객 생성
+        spawnNewCustomer();
+
+        // 화면 갱신
+        repaint();
+    }
 
     private void startCustomerCooldown() {
         Timer cooldownTimer = new Timer (10000, e -> {

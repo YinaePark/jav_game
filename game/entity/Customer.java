@@ -72,7 +72,7 @@ public abstract class Customer {
     }
     // abstract methods
     protected abstract void loadSprites();  // load sprites for customer
-    protected abstract void initializeCustomer();
+    public abstract void initializeCustomer();
     public abstract void updateSatisfaction(List<String> ingredients);
     public abstract int calculateReward();
 

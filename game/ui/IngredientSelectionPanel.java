@@ -19,13 +19,15 @@ public class IngredientSelectionPanel extends JDialog {
     private ActionListener submitListener;
     private NormalCustomer normalCustomer;
     private GamePanel gamePanel;
+    private GameWindow gameWindow;
 
-    public IngredientSelectionPanel(Frame owner, Player player, NormalCustomer normalCustomer, GamePanel gamePanel) {
+    public IngredientSelectionPanel(Frame owner, Player player, NormalCustomer normalCustomer, GamePanel gamePanel, GameWindow gameWindow) {
         super(owner, "Select Ingredients", true);
         this.player = player;
         this.normalCustomer = normalCustomer;
         this.gamePanel = gamePanel;  // GamePanel 저장
         this.selectedIngredients = new Item[MAX_INGREDIENTS];
+        this.gameWindow = gameWindow;
         initialize();
     }
 
@@ -49,7 +51,7 @@ public class IngredientSelectionPanel extends JDialog {
 
             // 결과 메시지 표시
             JOptionPane.showMessageDialog(this, "You have earned " + reward + " euros!");
-            gamePanel.removeCustomer(normalCustomer);
+            gameWindow.removeCustomer(normalCustomer);
         }
 
         // 대화 상자 닫기

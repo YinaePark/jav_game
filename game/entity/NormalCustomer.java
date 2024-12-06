@@ -75,7 +75,7 @@ public class NormalCustomer extends Customer {
     }
 
     @Override
-    protected void initializeCustomer() {
+    public void initializeCustomer() {
         this.maxWaitingTime = MAX_WAITING_MINUTES;
         this.currentWaitingTime = 0;
         this.satisfactionLevel = 5;

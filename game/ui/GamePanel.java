@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -431,16 +432,12 @@ public class GamePanel extends JPanel {
 
     private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
         // IngredientSelectionDialog 생성 (Player와 연결)
-        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(gameWindow, player, (NormalCustomer) customer, this);
+        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(gameWindow, player, (NormalCustomer) customer, this, gameWindow);
 
         // 다이얼로그 표시
         ingredientSelectionPanel.setVisible(true);
 
 
-    }
-    public void removeCustomer(Customer customer) {
-        customers.remove(customer);
-        repaint();  // 고객을 제거한 후 화면을 갱신
     }
 
 
