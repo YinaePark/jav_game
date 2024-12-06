@@ -1,4 +1,4 @@
-package domain.player;
+package domain;
 
 import domain.item.HarvestItem;
 import domain.item.Item;
@@ -10,27 +10,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Represents a player with money, inventory, and various actions like planting, harvesting, and selling items.
+ */
 public class Player {
-    private double money;
-    private List<Item> inventory;
+    private double money; // Current money the player has
+    private List<Item> inventory; // Player's inventory
     private static final int MAX_INVENTORY_SIZE = 25;
-    private final List<Consumer<List<Item>>> inventoryChangeListeners; // inventory change listener
+    private final List<Consumer<List<Item>>> inventoryChangeListeners; // Listeners for inventory changes
 
     public Player(double initialMoney) {
         this.money = initialMoney;
         this.inventory = new ArrayList<>();
         this.inventoryChangeListeners = new ArrayList<>();
 
-        // set default inventory
-        Item onion = new Onion();
-        Item tomato  = new Tomato();
-        addItem(tomato);
-        addItem(onion);
-
+        // Set default inventory with initial items
+        addItem(new Onion());
+        addItem(new Tomato());
     }
 
-    public int getMaxInventorySize() {return MAX_INVENTORY_SIZE;}
-
+    // Money management methods
     public boolean spendMoney(double amount) {
         if (amount > money) {
             System.out.println("Not enough money.");
@@ -48,6 +47,7 @@ public class Player {
         return money;
     }
 
+    // Inventory management methods
     public List<Item> getInventory() {
         return new ArrayList<>(inventory);
     }
@@ -58,56 +58,76 @@ public class Player {
             return false;
         }
         inventory.add(item);
-        notifyInventoryChange(); // notify change
-        return true;  // return true when success adding item
+        notifyInventoryChange();
+        return true;
     }
 
     public boolean removeItem(String itemName) {
         for (Item inventoryItem : inventory) {
             if (inventoryItem.getName().equalsIgnoreCase(itemName)) {
-                inventory.remove(inventoryItem); // remove first item with itemName
-                System.out.println("Successfully removed.");
-                notifyInventoryChange(); // notify change
-                return true; // return true when success removing item
+                inventory.remove(inventoryItem);
+                System.out.println("Successfully removed: " + itemName);
+                notifyInventoryChange();
+                return true;
             }
         }
-        return false; // if there's no item with itemName, return false
+        return false;
     }
 
     public int getItemCount(Item item) {
         return (int) inventory.stream().filter(i -> i.equals(item)).count();
     }
 
-    // if harvest success, add item to inventory
-    // 요리 판매: 5개의 재료를 사용하여 요리 판매
+    /**
+     * Sells a dish by removing ingredients from inventory and rewarding the player.
+     * @param dishIngredients Ingredients needed for the dish
+     * @param customer        Customer buying the dish
+     */
     public void sellDish(List<Item> dishIngredients, NormalCustomer customer) {
         if (dishIngredients.size() != 5) {
             System.out.println("A dish requires exactly 5 ingredients.");
             return;
         }
 
-        // 인벤토리에서 재료가 있는지 확인
-        for (Item item : dishIngredients) {
-            if (!inventory.contains(item)) {
-                System.out.println("Missing ingredient: " + item.getName());
-                return;  // 부족한 재료가 있으면 판매하지 않음
-            }
+        // Validate and process ingredients
+        if (!hasAllIngredients(dishIngredients)) {
+            System.out.println("Missing ingredients. Cannot sell the dish.");
+            return;
         }
+        removeIngredients(dishIngredients);
 
-        // 재료 제거
-        for (Item item : dishIngredients) {
-            removeItem(item.getName());
-        }
-
-        // 판매한 요리에 대한 보상 추가 (예시로 100 단위로 설정)
+        // Reward player
         int reward = customer.calculateReward();
         earnMoney(reward);
-        System.out.println("Dish sold for "+ reward + " euros!");
-        notifyInventoryChange(); // 변경 알림
-
+        System.out.println("Dish sold for " + reward + " euros!");
     }
 
-    // 농작물 심기: 단지 농장에 심는 작업만 수행
+    /**
+     * Checks if the inventory contains all required ingredients.
+     * @param ingredients List of required ingredients
+     * @return true if all ingredients are available, false otherwise
+     */
+    private boolean hasAllIngredients(List<Item> ingredients) {
+        for (Item item : ingredients) {
+            if (!inventory.contains(item)) {
+                System.out.println("Missing ingredient: " + item.getName());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Removes a list of ingredients from the inventory.
+     * @param ingredients List of ingredients to remove
+     */
+    private void removeIngredients(List<Item> ingredients) {
+        for (Item item : ingredients) {
+            removeItem(item.getName());
+        }
+    }
+
+    // Crop-related methods
     public boolean plantCrop(HarvestItem cropItem, double plantingCost) {
         if (spendMoney(plantingCost)) {
             System.out.println("Planted " + cropItem.getName() + "!");
@@ -115,7 +135,7 @@ public class Player {
         }
         return false;
     }
-    // 농작물 수확: 수확 가능한 경우 인벤토리에 추가
+
     public boolean harvestCrop(HarvestItem cropItem) {
         if (!cropItem.isReadyToHarvest()) {
             System.out.println(cropItem.getName() + " is not ready to harvest yet.");
@@ -131,24 +151,23 @@ public class Player {
         }
     }
 
+    // Debugging and inventory display
     public void printInventory() {
-        System.out.println("Inventory: ");
+        System.out.println("Inventory:");
         for (Item item : inventory) {
             System.out.println("- " + item.getName());
         }
-        System.out.println("MONEY : " + getMoney());
+        System.out.println("Money: " + getMoney());
     }
 
-    // add listener
+    // Inventory listeners
     public void addInventoryChangeListener(Consumer<List<Item>> listener) {
         inventoryChangeListeners.add(listener);
     }
 
-    // notify change to listener
     private void notifyInventoryChange() {
         for (Consumer<List<Item>> listener : inventoryChangeListeners) {
             listener.accept(new ArrayList<>(inventory));
         }
     }
-
 }

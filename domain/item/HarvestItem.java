@@ -9,12 +9,6 @@ public class HarvestItem extends Item implements Growable, Purchasable {
     private long plantedTimestamp; // Timestamp of when the item was planted (in milliseconds)
     private boolean isHarvested;   // Indicates if the item has been harvested
 
-    /**
-     * Constructs a HarvestItem with a name, price, and growth time.
-     * @param name        the name of the item
-     * @param price       the purchase price of the item
-     * @param growthTime  the total time (in seconds) required for the item to grow
-     */
     public HarvestItem(String name, double price, int growthTime) {
         super(name);
         this.price = price;

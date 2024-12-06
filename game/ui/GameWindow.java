@@ -10,7 +10,7 @@ import java.util.Random;
 
 import core.CommandRegistry;
 import domain.Farm;
-import domain.player.Player;
+import domain.Player;
 import game.entity.PlayerRenderer;
 import game.entity.Customer;
 import game.entity.NormalCustomer;

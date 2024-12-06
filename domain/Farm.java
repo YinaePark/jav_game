@@ -4,14 +4,23 @@ import domain.item.HarvestItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a farm where crops can be planted and harvested.
+ * Manages the crops in plots and their lifecycle.
+ */
 public class Farm {
     private List<HarvestItem> crops = new ArrayList<>();
-    private final int plotCount = 500000;
+    private final int plotCount = 48;
 
-    // 농작물 심기
+    /**
+     * Plants a crop in an available plot.
+     * If no plots are available, the operation fails with a message.
+     *
+     * @param crop The crop to be planted
+     */
     public void plantCrop(HarvestItem crop) {
         if (crops.size() < plotCount) {
-            crop.plant(); // 심으면 심은 시점부터 성장 시작
+            crop.plant();
             crops.add(crop);
             System.out.println(crop.getName() + " has been planted.");
         } else {
@@ -19,38 +28,34 @@ public class Farm {
         }
     }
 
-    // 농작물 수확
+    /**
+     * Harvests a crop by its name if it is ready to be harvested.
+     * The crop is removed from the farm upon successful harvest.
+     *
+     * @param cropName The name of the crop to harvest
+     * @return The harvested crop, or null if the crop is not ready or not found
+     */
     public HarvestItem harvestCrop(String cropName) {
         for (HarvestItem crop : crops) {
             if (crop.getName().equalsIgnoreCase(cropName)) {
                 if (crop.isReadyToHarvest()) {
                     crops.remove(crop);
-                    System.out.println(crop.getName() + " has been harvested.");
-                    return crop; // 수확된 농작물 반환
+                    return crop;
                 } else {
-                    System.out.println(crop.getName() + " is not ready to harvest yet.");
                     return null;
                 }
             }
         }
         System.out.println("No crop with the name " + cropName + " is planted.");
-        return null; // 해당 이름의 농작물이 없거나 수확 준비가 안 된 경우
+        return null;
     }
 
-    // 농장 상태 출력
-    public void printFarmStatus() {
-        System.out.println("Farm Status:");
-        for (int i = 0; i < plotCount; i++) {
-            if (i < crops.size()) {
-                HarvestItem crop = crops.get(i);
-                System.out.println("Plot " + (i + 1) + ": " + crop.getName() +
-                        " (Growth: " + crop.getGrowthProgress() + "%, Ready to Harvest: " + crop.isReadyToHarvest() + ")");
-            } else {
-                System.out.println("Plot " + (i + 1) + ": Empty");
-            }
-        }
-    }
-    // 농작물 중 수확 가능한 농작물만 반환
+
+    /**
+     * Retrieves all crops that are ready to be harvested.
+     *
+     * @return A list of crops that can be harvested
+     */
     public List<HarvestItem> getReadyToHarvestCrops() {
         List<HarvestItem> readyCrops = new ArrayList<>();
         for (HarvestItem crop : crops) {
@@ -60,13 +65,11 @@ public class Farm {
         }
         return readyCrops;
     }
-    // 남은 플롯 개수 반환
+
     public int getRemainingPlots() {
         return plotCount - crops.size();
     }
 
-
-    // 현재 농작물 목록 반환
     public List<HarvestItem> getCrops() {
         return crops;
     }

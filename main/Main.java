@@ -4,7 +4,7 @@ import java.util.Scanner;
 import core.CommandProcessor;
 import core.CommandRegistry;
 import domain.Farm;
-import domain.player.Player;
+import domain.Player;
 
 public class Main {
     private static boolean isRunning = true;

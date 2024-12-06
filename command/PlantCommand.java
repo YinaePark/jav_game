@@ -4,7 +4,7 @@ import domain.item.crops.*;
 import game.tile.FarmTile;
 import domain.Farm;
 import domain.item.HarvestItem;
-import domain.player.Player;
+import domain.Player;
 import game.ui.GamePanel;
 
 import javax.swing.JOptionPane;

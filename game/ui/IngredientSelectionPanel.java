@@ -2,7 +2,7 @@ package game.ui;
 
 import game.entity.NormalCustomer;
 import domain.item.Item;
-import domain.player.Player;
+import domain.Player;
 
 import javax.swing.*;
 import java.awt.*;

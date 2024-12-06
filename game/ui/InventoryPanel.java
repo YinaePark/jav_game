@@ -1,7 +1,7 @@
 package game.ui;
 
 import domain.item.Item;
-import domain.player.Player;
+import domain.Player;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;

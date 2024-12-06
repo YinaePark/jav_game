@@ -31,6 +31,7 @@ public class HelpCommand implements Command {
         help.append("• WASD - Move the player\n");
         help.append("• H - Show this help\n");
         help.append("• I - Show inventory\n");
+        help.append("• O - Show shop\n");
         help.append("• F - Show farm status\n");
         help.append("• SPACE - Harvest crops\n");
         help.append("• Q - Quit game\n\n");

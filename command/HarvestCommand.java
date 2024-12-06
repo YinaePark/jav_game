@@ -2,7 +2,7 @@ package command;
 
 import domain.Farm;
 import domain.item.HarvestItem;
-import domain.player.Player;
+import domain.Player;
 import game.tile.FarmTile;
 import game.ui.GamePanel;
 import game.entity.PlayerRenderer;
@@ -89,6 +89,7 @@ public void execute(String[] args) {
         // Check harvest success
         if (chance < 0.5) {
             tile.setCrop(null);
+            farm.harvestCrop(crop.getName());
             return crop.getName() + " harvest failed.\n";
         }
         // Calculate crop yield

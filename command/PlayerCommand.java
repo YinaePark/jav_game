@@ -1,6 +1,6 @@
 package command;
 
-import domain.player.Player;
+import domain.Player;
 import javax.swing.*;
 import java.awt.*;
 

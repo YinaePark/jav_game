@@ -1,11 +1,9 @@
 package core;
 import command.*;
 import domain.Farm;
-import domain.item.ShopItem;
-import domain.player.Player;
+import domain.Player;
 import game.ui.GamePanel;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CommandRegistry {
