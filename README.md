@@ -1,4 +1,4 @@
-# IST-4-JAV Java Programming Assignment
+# JAVA Restaurant - IST-4-JAV Java Programming Assignment 
 ## Team Members
 - Shinhyeong Lee / shinyeonglee@kaist.ac.kr
 - Jimin Lee / leejm@postech.ac.kr
@@ -6,13 +6,9 @@
 
 
 ## How to Compile
-### Environment
-- WSL Ubuntu 22.04.4 LTS
-- openjdk 17.0.13 2024-10-15
-
-### Stack
-
-- 
+### Environment & Stack
+- **Operating System**: WSL Ubuntu 22.04.4 LTS
+- java 17.0.12 2024-07-16 LTS
 
 ### Command
 ```
