@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Farm {
     private List<HarvestItem> crops = new ArrayList<>();
-    private final int plotCount = 5;
+    private final int plotCount = 500000;
 
     // 농작물 심기
     public void plantCrop(HarvestItem crop) {
