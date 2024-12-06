@@ -16,13 +16,13 @@ import java.awt.event.*;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-
+/**
+ * Main game panel that handles rendering and user interaction for the farming game.
+ */
 public class GamePanel extends JPanel {
     private GameWindow gameWindow;
     private CommandRegistry registry;
@@ -33,13 +33,13 @@ public class GamePanel extends JPanel {
     private Item selectedItem;
     private InventoryPanel inventoryPanel;
 
-
     private static final int TILE_SIZE = 40;
     private FarmTile[][] tiles;
-    private String selectedCrop = "tomato";
-
     private Image backgroundImage;
 
+    /**
+     * Enum for defining different input types and their associated commands.
+     */
     private enum InputType {
         MOUSE_LEFT(MouseEvent.BUTTON1, "till"),
         MOUSE_RIGHT(MouseEvent.BUTTON3, "plant"),
@@ -48,8 +48,8 @@ public class GamePanel extends JPanel {
         KEY_F(KeyEvent.VK_F, "farm"),
         KEY_SPACE(KeyEvent.VK_SPACE, "harvest");
 
-        private final int inputCode;
-        private final String commandName;
+        private final int inputCode; // Input key or mouse button code
+        private final String commandName; // Name of the command associated with the input
 
         InputType(int inputCode, String commandName) {
             this.inputCode = inputCode;
@@ -79,6 +79,9 @@ public class GamePanel extends JPanel {
         }
     }
 
+    /**
+     * Helper class representing a position in the farm tile grid.
+     */
     private static class Position {
         final int x;
         final int y;
@@ -93,14 +96,16 @@ public class GamePanel extends JPanel {
         }
 
         public boolean isValidFarmPosition() {
-            return x < 8 && y < 6;
+            return x < 8 && y < 6; // Ensure position is within farm boundaries
         }
     }
 
+    /**
+     * Checks if a tile is interactable based on proximity to the player
+     */
     private boolean isInteractable(int tileX, int tileY) {
         int playerCenterX = playerRenderer.getX() + (playerRenderer.getSize() / 2);
         int playerCenterY = playerRenderer.getY() + (playerRenderer.getSize() / 2);
-
         int playerTileX = playerCenterX / TILE_SIZE;
         int playerTileY = playerCenterY / TILE_SIZE;
 
@@ -108,6 +113,9 @@ public class GamePanel extends JPanel {
                Math.abs(tileY - playerTileY) <= 1;
     }
 
+    /**
+     * Constructor initializes the game panel and sets event listeners.
+     */
     public GamePanel(PlayerRenderer playerRenderer, Player player, Farm farm, CommandRegistry registry, List<Customer> customers) {
         this.playerRenderer = playerRenderer;
         this.player = player;
@@ -116,11 +124,10 @@ public class GamePanel extends JPanel {
         this.customers = customers;
         this.inventoryPanel = new InventoryPanel(player, this);
 
-
-        initializeTiles();
-        setupMouseListener();
-        setupKeyListener();
-        setFocusable(true);
+        initializeTiles(); // Create the farm tile grid
+        setupMouseListener(); // Handle mouse interactions
+        setupKeyListener(); // Handle keyboard interaction
+        setFocusable(true); // Ensure the panel can receive keyboard focus
         setBackground(Color.GREEN.darker());
 
         loadBackgroundImage();
@@ -167,9 +174,8 @@ public class GamePanel extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                handleMouseClick(e);
-                handleCustomerClick(e);
-
+                handleMouseClick(e); // Handle farm-related clicks
+                handleCustomerClick(e); // Handle customer interactions
             }
         });
     }
@@ -177,30 +183,35 @@ public class GamePanel extends JPanel {
     private void setupKeyListener() {
         addKeyListener(new KeyAdapter() {
             @Override
-        public void keyPressed(KeyEvent e) {
-            InputType inputType = InputType.fromKeyCode(e.getKeyCode());
-            if (inputType != null) {
-                Command command;
-                if (inputType == InputType.KEY_SPACE) {
-                    command = new HarvestCommand(player, farm, tiles, playerRenderer, GamePanel.this);
-                } else {
-                    command = registry.getCommand(inputType.getCommandName());
-                }
+            public void keyPressed(KeyEvent e) {
+                InputType inputType = InputType.fromKeyCode(e.getKeyCode());
+                if (inputType != null) {
+                    Command command;
+                    if (inputType == InputType.KEY_SPACE) {
+                        // Create a special command for harvesting
+                        command = new HarvestCommand(player, farm, tiles, playerRenderer, GamePanel.this);
+                    } else {
+                        // Retrieve a command from the registry
+                        command = registry.getCommand(inputType.getCommandName());
+                    }
 
-                if (command != null) {
-                    command.execute(new String[]{});
-                    repaint();
+                    if (command != null) {
+                        command.execute(new String[]{});
+                        repaint(); // Update the panel
+                    }
                 }
             }
-        }
         });
     }
 
+    /**
+     * Handles mouse clicks, (e.g.) tilling, planting
+     */
     private void handleMouseClick(MouseEvent e) {
         Position clickPosition = Position.fromMouseEvent(e, TILE_SIZE);
 
         if (!clickPosition.isValidFarmPosition()) {
-            return;
+            return; // Ignore clicks outside the farm boundaries
         }
 
         InputType inputType = InputType.fromMouseButton(e.getButton());
@@ -209,13 +220,13 @@ public class GamePanel extends JPanel {
 
             if (!isInteractable(clickPosition.x, clickPosition.y)) {
                 System.out.println("Too far away!");
-                return;
+                return; // Prevent interaction if the tile is out of range
             }
 
             Command command = createMouseCommand(inputType, tile);
             if (command != null) {
                 command.execute(new String[]{});
-                repaint();
+                repaint(); // Update the farm display
             }
         }
     }
@@ -223,37 +234,42 @@ public class GamePanel extends JPanel {
     private Command createMouseCommand(InputType inputType, FarmTile tile) {
         switch (inputType) {
             case MOUSE_LEFT:
-                return new TillCommand(tile);
+                return new TillCommand(tile); // Command to till the tile
             case MOUSE_RIGHT:
                 if (selectedItem != null) {
                     return new PlantCommand(player, farm, tile, selectedItem.getName(), this);
                 } else {
                     JOptionPane.showMessageDialog(this, "Please select a valid crop to plant.", "No Crop Selected", JOptionPane.WARNING_MESSAGE);
-                    return null;
+                    return null; // No valid item selected
                 }
             default:
-                return null;
+                return null; // No command for the given input
         }
     }
 
+    /**
+     * Paints the game panel, including tiles, player, customers, and HUD elements.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Draw the background
         if (backgroundImage != null){
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), (ImageObserver) null);
         } else {
             g.setColor(Color.GREEN.darker());
             g.fillRect(0,0, getWidth(), getHeight());
         }
-        // draw grid
+
+        // Draw the farm tiles and their states
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 6; j++) {
                 int x = i * TILE_SIZE;
                 int y = j * TILE_SIZE;
                 FarmTile tile = tiles[i][j];
 
-                // draw tile
+                // Highlight interactable tiles
                 if (isInteractable(i, j)) {
                     g.setColor(new Color(120,120, 100, 150));
                 } else {
@@ -261,37 +277,33 @@ public class GamePanel extends JPanel {
                 }
                 g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
+                // Draw tile borders
                 g.setColor(new Color(101, 67, 33, 150));
                 g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
 
-                // if tilled, fill the tile with dark brown
+                // Draw tilled soil
                 if (tile.isTilled()) {
                     g.setColor(new Color(139, 69, 19));
                     g.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                 }
 
-                // 작물이 심어져 있다면 성장 상태에 따라 그리기
+                // Draw crops based on their growth progress
                 if (tile.hasCrop()) {
                     int growthProgress = Math.min(100, Math.max(0, tile.getGrowthProgress()));
                     int size = calculateCropSize(growthProgress);
                     int alpha = Math.min(255, Math.max(0, calculateCropAlpha(growthProgress)));
 
-                    // 작물 이미지 그리기
                     Image cropSprite = tile.getCrop().getSprite(size, size);
 
-                    // 작물 크기 중앙 정렬
                     int cropX = x + (TILE_SIZE - size) / 2;
                     int cropY = y + (TILE_SIZE - size) / 2;
 
-                    // 알파값 적용을 위한 AlphaComposite 설정
                     Graphics2D g2d = (Graphics2D) g;
                     AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha/255.0f);
                     g2d.setComposite(alphaComposite);
 
-                    // 작물 그리기
                     g2d.drawImage(cropSprite, cropX, cropY, null);
 
-                    // 알파값 원래대로 복구
                     g2d.setComposite(AlphaComposite.SrcOver);
 
                     drawProgressBar(g, x, y, TILE_SIZE, growthProgress);
@@ -299,17 +311,17 @@ public class GamePanel extends JPanel {
             }
         }
 
-        // draw customers
+        // Draw customers
         if (customers != null) {
             for (Customer customer : customers) {
                 customer.draw(g);
             }
         }
 
-        // draw player
+        // Draw the player
         playerRenderer.draw(g);
 
-        // draw selected item
+        // Draw the selected item
         if (selectedItem != null) {
             int x = 10;  // 왼쪽 여백
             int y = getHeight() - 60; // 아래 여백
@@ -327,118 +339,124 @@ public class GamePanel extends JPanel {
         String moneyText = String.format("€ %.2f", player.getMoney());
         FontMetrics metrics = g.getFontMetrics();
         int moneyWidth = metrics.stringWidth(moneyText);
-        int moneyX = getWidth() - moneyWidth - 20; // 20 pixels from right edge
-        int moneyY = 30; // 30 pixels from top
+        int moneyX = getWidth() - moneyWidth - 20;
+        int moneyY = 30;
 
-        // Draw background for better visibility
         g.setColor(new Color(255, 255, 255, 180));
         g.fillRect(moneyX - 5, moneyY - metrics.getAscent(), moneyWidth + 10, metrics.getHeight());
 
-        // Draw money text
-        g.setColor(new Color(0, 100, 0)); // Dark green color for money
+        g.setColor(new Color(0, 100, 0));
         g.drawString(moneyText, moneyX, moneyY);
 
-        // customer time
         for (Customer customer : customers) {
             customer.draw(g);
         }
     }
 
     private int calculateCropSize(int growthProgress) {
-        int minSize = 10;
-        int maxSize = TILE_SIZE - 10;
-        return minSize + ((maxSize - minSize) * growthProgress / 100);
+        int maxCropSize = TILE_SIZE - 10; // Crop size at full growth
+        return maxCropSize * growthProgress / 100;
     }
 
     private int calculateCropAlpha(int growthProgress) {
-        int minAlpha = 128;  // 50% 투명도
-        int maxAlpha = 255;  // 완전 불투명
-        return minAlpha + ((maxAlpha - minAlpha) * growthProgress / 100);
+        return 255 * growthProgress / 100; // Full opacity at full growth
     }
 
+    /**
+     * Draws a progress bar to indicate the growth progress of a crop.
+     */
     private void drawProgressBar(Graphics g, int x, int y, int tileSize, int progress) {
-        int barHeight = 4;  // 막대바 높이
-        int barWidth = tileSize - 6;  // 막대바 너비
-        int barX = x + 3;  // 막대바 X 위치
-        int barY = y + tileSize - barHeight - 3;  // 막대바 Y 위치
+        int barHeight = 4;
+        int barWidth = tileSize - 6;
+        int barX = x + 3;
+        int barY = y + tileSize - barHeight - 3;
 
-        // 막대바 배경 (회색)
         g.setColor(new Color(100, 100, 100, 180));
         g.fillRect(barX, barY, barWidth, barHeight);
 
-        // 진행도 막대 (초록색)
         int progressWidth = (int)((barWidth * progress) / 100.0);
+
+        // Green for the progress bar
         g.setColor(new Color(50, 205, 50, 230));
         g.fillRect(barX, barY, progressWidth, barHeight);
 
-        // 막대바 테두리
+        // Border of the progress bar
         g.setColor(new Color(0, 0, 0, 180));
         g.drawRect(barX, barY, barWidth, barHeight);
     }
 
-
     private void handleCustomerClick(MouseEvent e) {
-        // 1. 클릭된 위치의 고객 찾기
+        // 1. Find the customer at the clicked position
         Customer customer = findCustomerAtPosition(e.getX(), e.getY());
         if (customer == null) {
-            return; // 고객이 없다면 처리 종료
+            return; // Exit if no customer is found at the click position
         }
-        // 2. 요리 선택 다이얼로그 표시
+        // 2. Show the dish selection dialog for the found customer
         showDishSelectionDialog(customer);
     }
 
     private Customer findCustomerAtPosition(int x, int y) {
         for (Customer customer : customers) {
             if (customer.contains(x, y)) {
-                return customer;
+                return customer; // Return the customer if the position is inside their area
             }
         }
-        return null; // 클릭된 위치에 고객이 없을 경우
+        return null; // if no customer is found at the clicked position
     }
 
+    /**
+     * Displays a dialog for selecting a dish for the customer.
+     * @param customer the customer who will receive the dish
+     */
     private void showDishSelectionDialog(Customer customer) {
-        List<Recipe> customerRecipes = customer.getAssignedRecipes();
+        List<Recipe> customerRecipes = customer.getAssignedRecipes(); // Get the list of available recipes for the customer
 
-        // ChoiceDishPanel 생성 
+        // Create and configure the ChoiceDishPanel
         JPanel panel = new JPanel(new BorderLayout());
         ChoiceDishPanel choiceDishPanel = new ChoiceDishPanel(customerRecipes, selectedDish -> {
             serveDishToCustomer(selectedDish, customer);
             ((JDialog) SwingUtilities.getWindowAncestor(panel)).dispose(); // 다이얼로그 닫기
         });
 
-        // 다이얼로그 구성
+        // Set up the dialog window
         panel.add(choiceDishPanel, BorderLayout.CENTER);
         JDialog dialog = new JDialog();
         dialog.setTitle("Select a Dish for Customer");
-        dialog.setModal(true);
+        dialog.setModal(true); // Make the dialog modal (blocks interaction with other windows)
         dialog.add(panel);
-        dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+        dialog.pack(); // Adjust dialog size to fit its content
+        dialog.setLocationRelativeTo(this); // Position dialog relative to this window
+        dialog.setVisible(true); // Show the dialog
     }
 
-
+    /**
+     * Serves the selected dish to the customer and shows the ingredient selection dialog.
+     * @param selectedDish the name of the selected dish
+     * @param customer the customer who will receive the dish
+     */
     private void serveDishToCustomer(String selectedDish, Customer customer) {
-        // 선택한 레시피에 대해 재료 선택 다이얼로그 띄우기
-        RecipeManager recipeManager = RecipeManager.getInstance();
-        Recipe selectedRecipe = recipeManager.getRecipe(selectedDish);
+        RecipeManager recipeManager = RecipeManager.getInstance(); // Get the recipe manager instance
+        Recipe selectedRecipe = recipeManager.getRecipe(selectedDish); // Retrieve the recipe for the selected dish
         if (selectedRecipe == null) {
-            // 해당 이름에 맞는 레시피가 없을 경우 처리
+            // Handle error if recipe is not found
             System.out.println("Error: Recipe not found for " + selectedDish);
             return;
         }
         showIngredientSelectionDialog(selectedRecipe, customer);
     }
 
+    /**
+     * Displays the ingredient selection dialog for the selected recipe.
+     * @param selectedDish the selected recipe object
+     * @param customer the customer who is receiving the dish
+     */
     private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
-        // IngredientSelectionDialog 생성 (Player와 연결)
-        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(gameWindow, player, (NormalCustomer) customer, this, gameWindow);
+        // Create and configure the IngredientSelectionPanel
+        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(
+                gameWindow, player, (NormalCustomer) customer, this, gameWindow
+        );
 
-        // 다이얼로그 표시
+        // Show the ingredient selection panel as a dialog
         ingredientSelectionPanel.setVisible(true);
-
-
     }
-
-
 }

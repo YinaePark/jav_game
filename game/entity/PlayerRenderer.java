@@ -25,18 +25,21 @@ public class PlayerRenderer {
     private static final double MOVEMENT_SPEED = 6.0;
     private boolean isMovingToTarget = false;
 
+    // Enum to represent the possible directions the player can face
     private enum Direction {
         DOWN, UP, SIDE
     }
-    
+
+    // Constructor that initializes the player position and loads the sprite sheet
     public PlayerRenderer(int x, int y) {
         this.x = x;
         this.y = y;
         this.targetX = x;
         this.targetY = y;
-        loadSprites();
+        loadSprites(); // Load the sprite sheet and create individual sprites for different directions
     }
 
+    // Loads the sprite sheet and extracts individual sprites for each animation direction
     private void loadSprites() {
         try {
             File file = new File("sprites/player/player.png");
@@ -45,19 +48,22 @@ public class PlayerRenderer {
                 int frameWidth = spriteSheet.getWidth() / 3;
                 int frameHeight = spriteSheet.getHeight() / 4;
                 
-                // init sprite arrays
+                // Initialize sprite arrays for each direction
                 frontSprites = new BufferedImage[4];
                 backSprites = new BufferedImage[4];
                 sideSprites = new BufferedImage[4];
-                
+
+                // Extract front (downward) facing sprites
                 for (int i = 0; i < 4; i++) {
                     frontSprites[i] = spriteSheet.getSubimage(0, i * frameHeight, frameWidth, frameHeight);
                 }
-            
+
+                // Extract back (upward) facing sprites
                 for (int i = 0; i < 4; i++) {
                     backSprites[i] = spriteSheet.getSubimage(frameWidth, i * frameHeight, frameWidth, frameHeight);
                 }
-                
+
+                // Extract side (left/right) facing sprites
                 for (int i = 0; i < 4; i++) {
                     sideSprites[i] = spriteSheet.getSubimage(frameWidth * 2, i * frameHeight, frameWidth, frameHeight);
                 }
@@ -67,11 +73,13 @@ public class PlayerRenderer {
             spriteSheet = null;
         }
     }
-    
+
+    // Moves the player by dx and dy (change in x and y)
     public void move(int dx, int dy) {
         if (dx != 0 || dy != 0) {
             isMoving = true;
 
+            // Calculate the target position based on movement
             int currentTileX = x / SIZE;
             int currentTileY = y / SIZE;
 
@@ -81,12 +89,13 @@ public class PlayerRenderer {
             targetX = nextTileX * SIZE + (SIZE - this.SIZE) / 2;
             targetY = nextTileY * SIZE + (SIZE - this.SIZE) / 2;
 
+            // Keep the player within the bounds of the screen
             targetX = Math.max(0, Math.min(targetX, 800 - SIZE));
             targetY = Math.max(0, Math.min(targetY, 600 - SIZE));
 
             isMovingToTarget = true;
-            
-            // set facing direction
+
+            // Set facing direction based on movement
             if (Math.abs(dx) > Math.abs(dy)) {
                 facing = Direction.SIDE;
                 facingLeft = dx < 0;  // true if moving left
@@ -96,12 +105,14 @@ public class PlayerRenderer {
         }
     }
 
+    // Updates the player's position towards the target and manages animation
     public void update() {
         if (isMovingToTarget) {
             double dx = targetX - x;
             double dy = targetY - y;
             double distance = Math.sqrt(dx * dx + dy * dy);
-            
+
+            // Move towards the target position
             if (distance < MOVEMENT_SPEED) {
                 x = (int) targetX;
                 y = (int) targetY;
@@ -126,15 +137,16 @@ public class PlayerRenderer {
                 animationDelay = 0;
             }
         } else {
-            currentFrame = 0;  // idle frame
+            currentFrame = 0;  // Idle frame when not moving
         }
     }
 
+    // Draws the player at its current position with the correct animation
     public void draw(Graphics g) {
         if (spriteSheet != null) {
             BufferedImage currentSprite = null;
-            
-            // determine which sprite to draw
+
+            // Select the correct sprite based on the direction the player is facing
             switch (facing) {
                 case DOWN:
                     currentSprite = frontSprites[currentFrame];
@@ -146,7 +158,8 @@ public class PlayerRenderer {
                     currentSprite = sideSprites[currentFrame];
                     break;
             }
-            
+
+            // Draw the sprite on the screen, flipping it horizontally if facing left
             if (currentSprite != null) {
                 if (facing == Direction.SIDE && facingLeft) {
                     // flip sprite horizontally
@@ -156,11 +169,13 @@ public class PlayerRenderer {
                 }
             }
         } else {
+            // Fallback if sprite sheet is not loaded
             g.setColor(Color.RED);
             g.fillRect(x, y, SIZE, SIZE);
         }
     }
 
+    // Getters for player position and size
     public int getX() { return x; }
     public int getY() { return y; }
     public int getSize() { return SIZE; }

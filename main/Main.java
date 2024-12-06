@@ -6,7 +6,6 @@ import core.CommandRegistry;
 import domain.Farm;
 import domain.player.Player;
 
-
 public class Main {
     private static boolean isRunning = true;
 
