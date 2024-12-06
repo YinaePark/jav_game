@@ -56,25 +56,9 @@ public abstract class Item {
         return scaledImage;
     }
 
-
     public String getName() {
         return name;
     }
 
-    public abstract double getPrice(); // 가격을 반환하는 메서드 (상점용)
-
-    // Get color for item visualization
-//    public Color getColor() {
-//        switch (name.toLowerCase()) {
-//            case "tomato": return Color.RED;
-//            case "carrot": return Color.ORANGE;
-//            case "corn": return Color.YELLOW;
-//            case "lettuce": return Color.GREEN;
-//            case "onion": return Color.WHITE;
-//            case "olive": return Color.GRAY;
-//            case "wheat": return Color.YELLOW;
-//            case "truffle": return Color.BLACK;
-//            default: return Color.GREEN;
-//        }
-//    }
+    public abstract double getPrice();
 }
