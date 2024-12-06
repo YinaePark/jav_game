@@ -63,11 +63,13 @@ $ java game/GameMain
 - Your restaurant is bustling with customers!
     - When a customer arrives, click on them to see their requested menu options.
     - Choose one menu item to serve.
+
   ![Order](sprites/readme/cooking.png)
 - **Cooking**:
   1. Select up to 5 ingredients from your inventory by clicking on them.
   2. Place ingredients in the slots provided.
   3. Click **Submit** to serve the dish.
+  
   ![Cooking](sprites/readme/cooking2.png)
 - **Rewards**:
     - Earn rewards for meeting the customer’s expectations. 
