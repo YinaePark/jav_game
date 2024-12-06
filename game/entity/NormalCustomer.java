@@ -2,28 +2,29 @@ package game.entity;
 
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
-
 import game.recipe.Recipe;
 import game.recipe.RecipeManager;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 
-
 public class NormalCustomer extends Customer {
-    private static final int MAX_WAITING_MINUTES = 30000;  // 5min
-    private static final int BASE_REWARD = 100;         // base reward
-    private static final double SATISFACTION_MULTIPLIER = 1.2; // satisfaction multiplier
+    private static final int MAX_WAITING_MINUTES = 30000; // Maximum waiting time (1/2 minute)
     private Random random;
+
+    // Constructor
     public NormalCustomer(int x, int y) {
         super(x, y);
     }
 
+    /**
+     * Selects a random image path for the customer sprite.
+     * @return the path to the selected image.
+     */
     protected String loadRandomCustomerImage(){
-        random = new Random();  // random 객체 초기화는 생성자에서
+        random = new Random();  // Random instance for image selection
         String[] customerImagePaths = {
                 "sprites/player/customer1.png",
                 "sprites/player/customer2.png",
@@ -31,39 +32,39 @@ public class NormalCustomer extends Customer {
                 "sprites/player/customer4.png",
                 "sprites/player/customer5.png",
         };
-        String randomImagePath = customerImagePaths[random.nextInt(customerImagePaths.length)];
-        return randomImagePath;
-
+        return customerImagePaths[random.nextInt(customerImagePaths.length)];
     }
 
-
+    /*
+     * Loads customer sprites for animations in different directions.
+     */
     @Override
     protected void loadSprites() {
         try {
-            random = new Random();  // random 객체 초기화는 생성자에서
             File file = new File(loadRandomCustomerImage());
-//            File file = new File("sprites/player/normal_customer.png");
             if (file.exists()) {
                 spriteSheet = ImageIO.read(file);
-                int frameWidth = spriteSheet.getWidth() / 3;  // 3 columns
+
+                // Calculate dimensions for sprite frames
+                int frameWidth = spriteSheet.getWidth() / 3; // 3 columns
                 int frameHeight = spriteSheet.getHeight() / 4; // 4 rows
 
-                // initialize sprite arrays
+                // initialize animation frames
                 frontSprites = new BufferedImage[4];
                 backSprites = new BufferedImage[4];
                 sideSprites = new BufferedImage[4];
 
-                // Load front animations
+                // Load front-facing animations
                 for (int i = 0; i < 4; i++) {
                     frontSprites[i] = spriteSheet.getSubimage(0, i * frameHeight, frameWidth, frameHeight);
                 }
 
-                // Load back animations
+                // Load back-facing animations
                 for (int i = 0; i < 4; i++) {
                     backSprites[i] = spriteSheet.getSubimage(frameWidth, i * frameHeight, frameWidth, frameHeight);
                 }
 
-                // Load side animations
+                // Load side-facing animations
                 for (int i = 0; i < 4; i++) {
                     sideSprites[i] = spriteSheet.getSubimage(frameWidth * 2, i * frameHeight, frameWidth, frameHeight);
                 }
@@ -74,20 +75,26 @@ public class NormalCustomer extends Customer {
         }
     }
 
+    /*
+     * Initializes customer-specific attributes, such as:
+     * - Maximum waiting time.
+     * - Satisfaction level.
+     * - Randomly ordered menus.
+     */
     @Override
     public void initializeCustomer() {
         this.maxWaitingTime = MAX_WAITING_MINUTES;
         this.currentWaitingTime = 0;
-        this.satisfactionLevel = 5;
+        this.satisfactionLevel = 100;
 
-        // RecipeManager에서 레시피 목록 가져오기
+        // Fetch all recipes from RecipeManager
         RecipeManager recipeManager = RecipeManager.getInstance();
         List<String> availableMenus = new ArrayList<>(recipeManager.getAllRecipeNames());
 
         orderedMenus = new ArrayList<>();
         Random random = new Random();
 
-        // 3개의 랜덤 메뉴 선택
+        // Select three unique random menus
         while (orderedMenus.size() < 3 && !availableMenus.isEmpty()) {
             String menu = availableMenus.get(random.nextInt(availableMenus.size()));
             if (!orderedMenus.contains(menu)) {
@@ -96,74 +103,74 @@ public class NormalCustomer extends Customer {
         }
     }
 
+    /**
+     * Updates the satisfaction level of the customer based on provided ingredients.
+     * @param ingredients List of ingredients given by the player.
+     */
     @Override
     public void updateSatisfaction(List<String> ingredients) {
-        // RecipeManager에서 레시피의 상세 정보 가져오기
         RecipeManager recipeManager = RecipeManager.getInstance();
 
-        // 주문한 메뉴 중 첫 번째 메뉴의 평가
+        // Evaluate the first ordered menu
         String menu = orderedMenus.get(0);
         Recipe recipe = recipeManager.getRecipe(menu);
 
         if (recipe == null) {
-            satisfactionLevel = 0;
+            satisfactionLevel = 0; // Set satisfaction to 0 if recipe not found
             return;
         }
 
         List<String> recipeIngredients = recipe.getIngredients();
 
-        // 첫 번째 기준: 주재료 확인 (50점)
+        // Criterion 1: Check if main ingredient is present (50 points)
         String mainIngredient = recipeIngredients.get(0);
         int score = userIngredientContainsMainIngredient(mainIngredient, ingredients) ? 50 : 0;
 
-        // 두 번째 기준: 재료 개수 차이 (-10점씩)
+        // Criterion 2: Penalize for ingredient count difference (-10 points per mismatch)
         int ingredientDifference = Math.abs(recipeIngredients.size() - ingredients.size());
         score -= ingredientDifference * 10;
 
-        // 세 번째 기준: 주재료 제외한 재료 일치율 (50점)
+        // Criterion 3: Match additional ingredients (up to 50 points)
         int additionalIngredientMatch = calculateAdditionalIngredientsMatch(recipeIngredients, ingredients);
         score += additionalIngredientMatch * 50;
 
-        // 점수 0 이하일 경우 0으로 설정
+        // Clamp the score between 0 and 100
         score = Math.max(0, Math.min(score, 100));
-
-        // 만족도 수준으로 변환 (0~100)
-        satisfactionLevel = score;
-
+        satisfactionLevel = score; // Convert to satisfaction level
     }
 
+    /**
+     * Calculates the reward for the player based of satisfaction level.
+     * @return The calculated reward value.
+     */
     @Override
     public int calculateReward() {
-        // RecipeManager에서 레시피의 상세 정보 가져오기
         RecipeManager recipeManager = RecipeManager.getInstance();
         String menu = orderedMenus.get(0);
         Recipe recipe = recipeManager.getRecipe(menu);
 
         if (recipe == null) {
-            return 0;
+            return 0; // No reward if recipe not found
         }
 
-        // 레시피의 기본 보상값
+        // Base reward from the recipe
         int baseReward = recipe.getBaseReward();
 
-        // 만족도 점수 계산: (만족도**2 - 100)
+        // Calculate satisfaction score (e.g., satisfaction * 2 - 100)
         double satisfactionScore = satisfactionLevel * 2 - 100;
 
-        // 최종 보상 계산
+        // Final reward calculation
         double reward = baseReward * (satisfactionScore / 100);
-
         return (int) reward;
-
     }
 
-    // 주재료 포함 여부 확인
+    // Helper method: Check if main ingredient is present
     private boolean userIngredientContainsMainIngredient(String mainIngredient, List<String> ingredients) {
         return ingredients.contains(mainIngredient);
     }
 
-    // 주재료 제외한 재료 일치율 계산
+    // Helper method: Calculate additional ingredient match rate
     private int calculateAdditionalIngredientsMatch(List<String> recipeIngredients, List<String> userIngredients) {
-        // 주재료 제외
         List<String> additionalRecipeIngredients = recipeIngredients.subList(1, recipeIngredients.size());
 
         int matchCount = 0;
@@ -173,7 +180,7 @@ public class NormalCustomer extends Customer {
             }
         }
 
-        // 일치율 계산 (소수점 반올림)
+        // Calculate match rate and round to the nearest integer
         return (int) Math.round((double) matchCount / (additionalRecipeIngredients.size()));
     }
 }

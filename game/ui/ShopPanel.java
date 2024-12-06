@@ -27,8 +27,7 @@ public class ShopPanel extends JPanel {
         setPreferredSize(new Dimension(300, 300));
         initializeSlots();
         addMouseListener(new ShopMouseListener());
-        updateShop(ShopItemManager.getAllItems());
-
+        updateShop(ShopItemManager.getAllItems()); // Load available items into the shop
     }
 
     private void initializeSlots() {
@@ -42,27 +41,21 @@ public class ShopPanel extends JPanel {
                 slots[i][j] = new ShopSlot(x, y);
             }
         }
-
     }
 
-    public void toggleVisibility() {
-        isVisible = !isVisible;
-        repaint();
-    }
-
-    // ShopPanel 클래스 내부에서 paintComponent 수정
+    // Paint the ShopPanel with background and slots
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // ShopPanel 배경을 흰색으로 설정
+        // Set background color to dark gray
         g.setColor(Color.darkGray);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        // 슬롯들을 그린다.
+        // Draw each shop slot on the panel
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                slots[i][j].draw(g);
+                slots[i][j].draw(g); // Draw each slot
             }
         }
     }
@@ -73,29 +66,31 @@ public class ShopPanel extends JPanel {
         public void mouseClicked(MouseEvent e) {
             Point point = e.getPoint();
 
-            // 슬롯 클릭 시
+            // Check each slot for a click
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
-                    if (slots[i][j].contains(point)) {
-                        Item selectedItem = slots[i][j].getItem();
+                    if (slots[i][j].contains(point)) { // Check if the click was inside the slot
+                        Item selectedItem = slots[i][j].getItem(); // Get the item in the clicked slot
 
-                        // 수량을 선택하는 다이얼로그 띄우기
+                        // Show input dialog for entering item quantity
                         String input = JOptionPane.showInputDialog(ShopPanel.this,
                                 "Enter quantity for " + selectedItem.getName() + ":");
                         if (input != null) {
                             try {
                                 int quantity = Integer.parseInt(input);
                                 if (quantity > 0 && player.getMoney() >= selectedItem.getPrice() * quantity) {
-                                    // 상품 구매
+                                    // Proceed with purchase if valid quantity and sufficient funds
                                     player.spendMoney(selectedItem.getPrice() * quantity);
                                     for (int q = 0; q < quantity; q++) {
-                                        player.addItem(selectedItem);  // 수량만큼 아이템 추가
+                                        player.addItem(selectedItem);  // Add item to player's inventory
                                     }
                                     JOptionPane.showMessageDialog(ShopPanel.this, "Purchased " + quantity + " " + selectedItem.getName());
                                 } else {
+                                    // Show error if insufficient funds or invalid quantity
                                     JOptionPane.showMessageDialog(ShopPanel.this, "Insufficient funds or invalid quantity", "Error", JOptionPane.ERROR_MESSAGE);
                                 }
                             } catch (NumberFormatException ex) {
+                                // Show error if the input is not a valid number
                                 JOptionPane.showMessageDialog(ShopPanel.this, "Invalid number format.", "Error", JOptionPane.ERROR_MESSAGE);
                             }
                         }
@@ -105,17 +100,15 @@ public class ShopPanel extends JPanel {
         }
     }
 
-    // ShopPanel에 보여질 상품을 설정하는 메소드
+    // Update the shop with new available items
     public void updateShop(List<Item> availableItems) {
         int index = 0;
         for (Item item : availableItems) {
-            if (index >= ROWS * COLS) break;
+            if (index >= ROWS * COLS) break; // Stop if there are more items than available slots
             int row = index / COLS;
             int col = index % COLS;
-            slots[row][col].setItem(item);
+            slots[row][col].setItem(item); // Set item in the respective slot
             index++;
         }
     }
-
-
 }

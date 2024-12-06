@@ -11,64 +11,65 @@ public class ShopSlot {
     private Item item;
     private boolean selected;
 
+    // Constructor to initialize the position of the slot
     public ShopSlot(int x, int y) {
         this.bounds = new Rectangle(x, y, SLOT_SIZE, SLOT_SIZE);
         this.selected = false;
     }
 
-    // 아이템을 설정하는 메소드
+    // Set the item for this slot
     public void setItem(Item item) {
         this.item = item;
     }
 
-    public Item getItem() {
-        return item;
-    }
+    // Get the item in this slot
+    public Item getItem() { return item; }
 
+    // Check if a given point is inside the bounds of this slot
     public boolean contains(Point p) {
         return bounds.contains(p);
     }
 
-    // 선택 상태를 설정하는 메소드
+    // Set the selection state of the slot
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
-    // 슬롯을 그리는 메소드
+    // Draw the slot and its contents (item, price, and name)
     public void draw(Graphics g) {
-        // 슬롯 배경
+        // Draw the background of the slot
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
-        // 선택된 경우 테두리 강조
+        // If the slot is selected, draw a yellow border around it
         if (selected) {
             g.setColor(Color.YELLOW);
             g.drawRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
         }
 
-        // 기본 테두리
+        // Draw the regular dark border around the slot
         g.setColor(Color.DARK_GRAY);
         g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
         if (item != null) {
-            // 아이템 이미지 표시
+            // Draw the item image inside the slot, with padding
             Image itemSprite = item.getSprite(SLOT_SIZE - 2*PADDING, SLOT_SIZE - 2*PADDING);
             g.drawImage(itemSprite,
                     bounds.x + PADDING,
                     bounds.y + PADDING,
                     null);
 
-            // 가격 표시 (유로 기호 포함)
+            // Display the price of the item in euros, formatted to two decimal places
             g.setColor(Color.BLACK);
-            String priceStr = String.format("€%.2f", item.getPrice()); // 가격을 유로 형식으로 표시
+            String priceStr = String.format("€%.2f", item.getPrice()); // Format price with euro sign
             FontMetrics fm = g.getFontMetrics();
             int textX = bounds.x + bounds.width - fm.stringWidth(priceStr) - 5;
             int textY = bounds.y + bounds.height - 5;
-            g.drawString(priceStr, textX, textY);
+            g.drawString(priceStr, textX, textY); // Draw price in the bottom-right corner
 
-            // 아이템 이름 표시 (슬롯의 상단에)
+            // Display the item name at the top of the slot
             g.setColor(Color.BLACK);
-            g.drawString(item.getName(), bounds.x + 5, bounds.y + 15);
+            g.drawString(item.getName(), bounds.x + 5, bounds.y + 15); // Draw the item name with some padding
         }
     }
 }
