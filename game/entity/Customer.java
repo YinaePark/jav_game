@@ -20,23 +20,19 @@ public abstract class Customer {
     protected Direction facing = Direction.DOWN;
     protected boolean facingLeft = true;
     protected boolean isMoving = false;
-    protected long spawnTime;  // 고객이 생성된 시간
-    protected long remainingTime; // 남은 시간
-
+    protected long spawnTime;  // The time the customer was created
+    protected long remainingTime; // Remaining time for the customer to wait
     protected List<String> orderedMenus;  // menu list
     protected int satisfactionLevel;      // satisfaction level(0~5)
     protected int maxWaitingTime;         // maximum waiting time
     protected int currentWaitingTime;     // current waiting time
-
     public boolean isWaitingTooLong() {
         return currentWaitingTime >= maxWaitingTime;
     }
-
-
     public boolean isOrderComplete() {
         return false;
     }
-    private List<Recipe> assignedRecipes; // 고객에게 할당된 요리 목록
+    private List<Recipe> assignedRecipes;
 
     protected enum Direction {
         DOWN, UP, SIDE
@@ -45,9 +41,9 @@ public abstract class Customer {
     public Customer(int x, int y) {
         this.x = x;
         this.y = y;
-        this.spawnTime = System.currentTimeMillis();  // 고객이 생성된 시간
-        this.assignedRecipes = null; // 초기에는 null
-        this.satisfactionLevel = 5;  // initial satisfaction level
+        this.spawnTime = System.currentTimeMillis();
+        this.assignedRecipes = null;
+        this.satisfactionLevel = 5;
         this.maxWaitingTime = 30000;
         loadSprites();
         initializeCustomer();
@@ -55,27 +51,27 @@ public abstract class Customer {
 
     public long getRemainingTime(){
         remainingTime = maxWaitingTime - (System.currentTimeMillis() - spawnTime);
-        return remainingTime > 0 ? remainingTime : 0; // 0이하로 가지 않게 처리
+        return remainingTime > 0 ? remainingTime : 0; // Prevent negative remaining time
     }
 
 
     public List<Recipe> getAssignedRecipes() {
         return assignedRecipes;
     }
-
     public void assignRecipes(List<Recipe> recipes) {
         this.assignedRecipes = recipes;
     }
 
-    public boolean hasAssignedRecipes() {
-        return assignedRecipes != null;
-    }
     // abstract methods
     protected abstract void loadSprites();  // load sprites for customer
     public abstract void initializeCustomer();
     public abstract void updateSatisfaction(List<String> ingredients);
     public abstract int calculateReward();
 
+    /**
+     * Update the customer state: checks waiting time and updates animation.
+     * If the customer has waited too long, their satisfaction decreases.
+     */
     public void update() {
         if (isWaiting) {
             currentWaitingTime = (int)(System.currentTimeMillis() - spawnTime);
@@ -85,7 +81,10 @@ public abstract class Customer {
         }
         updateAnimation();
     }
-
+    /**
+     * Updates the animation frames when the customer is moving.
+     * If the customer is idle, resets the frame to 0.
+     */
     protected void updateAnimation() {
         if (isMoving) {
             animationDelay++;
@@ -97,7 +96,11 @@ public abstract class Customer {
             currentFrame = 0;  // idle frame
         }
     }
-
+    /**
+     * Draw the customer on the screen at their current position.
+     * Includes rendering the sprite and the remaining wait time.
+     * @param g Graphics object to render the customer
+     */
     public void draw(Graphics g) {
         if (spriteSheet != null) {
             BufferedImage currentSprite = null;
@@ -130,19 +133,19 @@ public abstract class Customer {
         long remainingTimeInSeconds = getRemainingTime() / 1000;
         String timeText = String.format("%d s", remainingTimeInSeconds);
 
-        int textX = x + SIZE / 2 - 15; // 고객의 중앙 위치
+        // Positioning the time label above the customer
+        int textX = x + SIZE / 2 - 15; // Centered horizontally
         int textY = y - 10;
 
-        // 동그라미 그리기
-        int circleRadius = 15; // 동그라미 반지름
-        g.setColor(Color.BLACK); // 동그라미 색상
+        // Draw a circle background for the time label
+        int circleRadius = 15;
+        g.setColor(Color.BLACK);
         g.fillOval(textX, textY-20, circleRadius * 2, circleRadius * 2); // 동그라미 배경
         if (remainingTimeInSeconds > 10) {
             g.setColor(Color.WHITE);
         }
         else {g.setColor(Color.RED);}
         g.drawString(timeText, textX , textY);
-        return;
     }
 
     protected void decreaseSatisfaction() {
@@ -150,28 +153,29 @@ public abstract class Customer {
             satisfactionLevel--;
         }
     }
-
+    /**
+     * Evaluates the food based on the customer's menu order and the provided ingredients.
+     */
     public int evaluateFood(String menu, List<String> ingredients) {
         if (!orderedMenus.contains(menu)) {
             return -1;
         }
-
         updateSatisfaction(ingredients);
-
         return calculateReward();
     }
 
-    // Getter/Setter
+    // Getter/Setter methods for customer properties
     public List<String> getOrderedMenus() { return orderedMenus; }
     public int getSatisfactionLevel() { return satisfactionLevel; }
     public boolean isWaiting() { return isWaiting; }
     public int getX() { return x; }
     public int getY() { return y; }
     public int getCurrentWaitingTime() { return currentWaitingTime; }
-    // 추가된 contains 메서드
+
+    /**
+     * Checks if the given mouse coordinates are within the customer’s bounds.
+     */
     public boolean contains(int mouseX, int mouseY) {
-        // 마우스 클릭이 고객 영역 내에 있는지 확인
         return mouseX >= x && mouseX <= x + SIZE && mouseY >= y && mouseY <= y + SIZE;
     }
-
 }
