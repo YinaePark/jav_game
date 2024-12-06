@@ -7,7 +7,10 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
-
+/**
+ * A panel that displays the player's inventory, allowing them to select and view items.
+ * Each inventory slot can contain a specific item and quantity.
+ */
 public class InventoryPanel extends JPanel {
     private static final int ROWS = 5;
     private static final int COLS = 5;
