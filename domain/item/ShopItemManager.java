@@ -5,6 +5,9 @@ import domain.item.ingredients.*;
 
 import java.util.*;
 
+/**
+ * Items in the shop
+ */
 public class ShopItemManager {
     private static List<Item> allItems = new ArrayList<>();
     public ShopItemManager() {

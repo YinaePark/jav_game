@@ -1,13 +1,16 @@
 package game.ui;
 
 import domain.item.Item;
-import domain.player.Player;
+import domain.Player;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
-
+/**
+ * A panel that displays the player's inventory, allowing them to select and view items.
+ * Each inventory slot can contain a specific item and quantity.
+ */
 public class InventoryPanel extends JPanel {
     private static final int ROWS = 5;
     private static final int COLS = 5;
@@ -16,7 +19,7 @@ public class InventoryPanel extends JPanel {
     private InventorySlot[][] slots;
     private Player player;
     private Item selectedItem;
-    private GamePanel gamePanel;  // 메인 게임 패널 참조
+    private GamePanel gamePanel;
 
     public InventoryPanel(Player player, GamePanel gamePanel) {
         this.player = player;
@@ -28,9 +31,12 @@ public class InventoryPanel extends JPanel {
         addMouseListener(new InventoryMouseListener());
 
         // Add listener to detect inventory changes
-        player.addInventoryChangeListener(this::updateInventory); // 수정된 호출
+        player.addInventoryChangeListener(this::updateInventory);
     }
 
+    /**
+     * Initializes the inventory slots by creating them and setting their positions.
+     */
     private void initializeSlots() {
         int slotSize = 50;
         int spacing = 5;
@@ -44,21 +50,24 @@ public class InventoryPanel extends JPanel {
         }
     }
 
-    public void updateInventory(List<Item> items) { // 매개변수 추가
-        // 모든 슬롯 초기화
+    /**
+     * Updates the inventory display with the given list of items.
+     * This method groups items by name and updates the slots accordingly.
+     */
+    public void updateInventory(List<Item> items) {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 slots[i][j].setItem(null, 0);
             }
         }
 
-        // 인벤토리 아이템을 종류별로 그룹화
+        // Group items by their names
         Map<String, List<Item>> itemGroups = new HashMap<>();
-        for (Item item : items) { // 전달받은 아이템 리스트 사용
+        for (Item item : items) {
             itemGroups.computeIfAbsent(item.getName(), k -> new ArrayList<>()).add(item);
         }
 
-        // 그룹화된 아이템을 슬롯에 배치
+        // Place grouped items into the inventory slots
         int slotIndex = 0;
         for (Map.Entry<String, List<Item>> entry : itemGroups.entrySet()) {
             if (slotIndex >= ROWS * COLS) break;
@@ -72,13 +81,15 @@ public class InventoryPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Paints the component, drawing the inventory background and the slots.
+     * @param g The graphics context to use for painting
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(new Color(200, 200, 200));
         g.fillRect(0, 0, getWidth(), getHeight());
-
-        // 모든 슬롯 그리기
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 slots[i][j].draw(g);
@@ -86,27 +97,29 @@ public class InventoryPanel extends JPanel {
         }
     }
 
+    /**
+     * Mouse listener to detect item selection from the inventory grid.
+     */
     private class InventoryMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             Point point = e.getPoint();
 
-            // 이전 선택 해제
+            // Deselect any previously selected item
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if (slots[i][j].contains(point)) {
-                        // 다른 모든 슬롯의 선택 해제
+                        // Clear the previous selection
                         clearSelection();
 
-                        // 새로운 슬롯 선택
+                        // Select the clicked slot and update the selected item
                         slots[i][j].setSelected(true);
                         selectedItem = slots[i][j].getItem();
 
-                        // GamePanel에 선택된 아이템 정보 전달
+                        // Notify the game panel about the selected item
                         if(gamePanel != null){
                             gamePanel.setSelectedItem(selectedItem);
                         }
-
                         repaint();
                         return;
                     }
@@ -115,6 +128,9 @@ public class InventoryPanel extends JPanel {
         }
     }
 
+    /**
+     * Clears the selection in all inventory slots.
+     */
     private void clearSelection() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {

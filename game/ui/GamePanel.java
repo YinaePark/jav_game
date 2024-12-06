@@ -4,7 +4,7 @@ import command.*;
 import core.CommandRegistry;
 import domain.Farm;
 import domain.item.Item;
-import domain.player.Player;
+import domain.Player;
 import game.entity.Customer;
 import game.entity.NormalCustomer;
 import game.entity.PlayerRenderer;

@@ -1,66 +1,89 @@
 package domain.item;
 
+/**
+ * Represents a harvestable item that can be planted, grown, and sold.
+ */
 public class HarvestItem extends Item implements Growable, Purchasable {
-    private double price; // price when player buy item from shop
-    private int growthTime; // total growth time
-    private long plantedTimestamp; // 심은 시점의 타임스탬프 (밀리초 단위)
-    private boolean isHarvested;
+    private double price;          // Price of the item when purchased
+    private int growthTime;        // Time required for the item to fully grow (in seconds)
+    private long plantedTimestamp; // Timestamp of when the item was planted (in milliseconds)
+    private boolean isHarvested;   // Indicates if the item has been harvested
 
     public HarvestItem(String name, double price, int growthTime) {
         super(name);
         this.price = price;
         this.growthTime = growthTime;
-        this.plantedTimestamp = -1; // 초기값: 아직 심어지지 않음
-        this.isHarvested = false;
+        this.plantedTimestamp = -1; // Initial state: not planted
+        this.isHarvested = false;   // Initial state: not harvested
     }
 
-    // Growable 인터페이스 구현
+    /**
+     * Plants the item, initializing its growth process.
+     */
     @Override
     public void plant() {
         System.out.println(getName() + " has been planted.");
-        this.plantedTimestamp = System.currentTimeMillis(); // 심는 시점 기록
-        this.isHarvested = false; // 심은 상태로 설정
+        this.plantedTimestamp = System.currentTimeMillis(); // Record planting time
+        this.isHarvested = false; // Mark as currently growing
     }
 
+    /**
+     * Checks if the item is ready to be harvested based on elapsed growth time.
+     * @return true if the item is fully grown, false otherwise.
+     */
     @Override
     public boolean isReadyToHarvest() {
-        return getTimeElapsed() >= this.growthTime; // 경과 시간이 성장 시간 이상인지 확인
+        return getTimeElapsed() >= this.growthTime;
     }
 
+    /**
+     * Marks the item as harvested if it is ready, otherwise notifies that it cannot be harvested yet.
+     */
     @Override
     public void harvest() {
         if (isReadyToHarvest()) {
             System.out.println(getName() + " has been harvested.");
-            this.isHarvested = true; // 수확 완료 상태로 설정
+            this.isHarvested = true; // Mark as harvested
         } else {
             System.out.println(getName() + " is not ready to harvest yet.");
         }
     }
 
-    // Sellable
+    /**
+     * Retrieves the purchase price of the item.
+     * @return the price of the item.
+     */
     @Override
     public double getPrice() {
         return price;
     }
 
-
-    // 심은 이후 경과 시간을 반환
+    /**
+     * Calculates the time elapsed since the item was planted.
+     * @return the elapsed time in seconds. Returns 0 if not planted or already harvested.
+     */
     private int getTimeElapsed() {
         if (plantedTimestamp == -1 || isHarvested) {
-            return 0; // 아직 심지 않았거나 수확 후에는 성장 멈춤
+            return 0; // Not planted or growth stops after harvest
         }
         long currentTime = System.currentTimeMillis();
         long elapsedMillis = currentTime - plantedTimestamp;
-        return (int) (elapsedMillis / 1000); // 시간 단위로 변환
+        return (int) (elapsedMillis / 1000); // Convert milliseconds to seconds
     }
 
-    // 성장 진행 상태 반환
+    /**
+     * Provides the growth progress of the item as a percentage.
+     * @return the growth progress as an integer percentage (0-100).
+     */
     public int getGrowthProgress() {
         int elapsed = getTimeElapsed();
         return (int) ((double) elapsed / this.growthTime * 100);
     }
 
-    // 디버깅 또는 상태 확인용
+    /**
+     * Prints the current status of the item, including growth progress and readiness for harvest.
+     * Useful for debugging or in-game status updates.
+     */
     public void printStatus() {
         System.out.println("Name: " + getName());
         System.out.println("Growth Progress: " + getGrowthProgress() + "%");

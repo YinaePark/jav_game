@@ -6,35 +6,41 @@ import java.util.List;
 import java.util.function.Consumer;
 import game.recipe.Recipe;
 
+/**
+ * A panel that displays a list of recipes as selectable dish slots.
+ * Each dish is represented by an icon, name, and a "Select" button.
+ */
 public class ChoiceDishPanel extends JPanel {
-    private List<Recipe> recipes;  // Recipe 객체 목록
+    private List<Recipe> recipes;
     private Consumer<String> onDishSelected;
 
     public ChoiceDishPanel(List<Recipe> recipes, Consumer<String> onDishSelected) {
         this.recipes = recipes;
         this.onDishSelected = onDishSelected;
 
-        setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20)); // 가로 배치와 간격 설정
+        // Set layout for the panel with centered flow and spacing between components
+        setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
         setBackground(Color.WHITE);
 
-        // 각 요리에 대해 고정된 크기의 슬롯을 생성
+        // Create and add dish slots for each recipe in the list
         for (Recipe recipe : recipes) {
             add(createDishSlot(recipe));
         }
     }
-
+    /**
+     * Creates a panel representing a single dish with an icon, name, and selection button.
+     */
     private JPanel createDishSlot(Recipe recipe) {
         JPanel dishPanel = new JPanel();
-        dishPanel.setLayout(new BoxLayout(dishPanel, BoxLayout.Y_AXIS)); // 세로 정렬
-        dishPanel.setPreferredSize(new Dimension(120, 150)); // 슬롯 크기 고정
-        dishPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // 테두리 추가
-        dishPanel.setBackground(new Color(250, 250, 250)); // 배경 색상 설정
-
-        // 아이콘 추가
+        dishPanel.setLayout(new BoxLayout(dishPanel, BoxLayout.Y_AXIS));
+        dishPanel.setPreferredSize(new Dimension(120, 150));
+        dishPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        dishPanel.setBackground(new Color(250, 250, 250));
+        // add icon
         JLabel iconLabel = new JLabel();
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        Image image = recipe.getSprite(50, 50); // 아이콘 크기 조정
+        Image image = recipe.getSprite(50, 50);
         if (image != null) {
             iconLabel.setIcon(new ImageIcon(image));
         } else {
@@ -43,29 +49,27 @@ public class ChoiceDishPanel extends JPanel {
         dishPanel.add(Box.createVerticalStrut(10));
         dishPanel.add(iconLabel);
 
-        // 이름 추가
+        // name label
         JLabel dishNameLabel = new JLabel(recipe.getName());
         dishNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         dishNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         dishPanel.add(Box.createVerticalStrut(5));
-        //dishNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         dishPanel.add(dishNameLabel);
 
-        // 버튼 추가
+        // select button
         JButton dishButton = new JButton("Select");
         dishButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         dishButton.setBackground(new Color(240, 240, 240));
         dishButton.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         dishButton.setFocusPainted(false);
         dishButton.addActionListener(e -> onDishSelected.accept(recipe.getName()));
-        dishPanel.add(Box.createVerticalStrut(10)); // 버튼과 이름 사이 여백
+        dishPanel.add(Box.createVerticalStrut(10)); // space between button and name
         dishPanel.add(dishButton);
-
         return dishPanel;
     }
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(450, 200); // 전체 패널 크기
+        return new Dimension(450, 200);
     }
 }

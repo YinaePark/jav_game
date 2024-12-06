@@ -125,7 +125,6 @@ public class PlayerRenderer {
                 y += (int) moveY;
             }
         }
-        
         updateAnimation();
     }
     

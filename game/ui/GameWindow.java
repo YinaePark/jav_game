@@ -10,7 +10,7 @@ import java.util.Random;
 
 import core.CommandRegistry;
 import domain.Farm;
-import domain.player.Player;
+import domain.Player;
 import game.entity.PlayerRenderer;
 import game.entity.Customer;
 import game.entity.NormalCustomer;
@@ -26,7 +26,7 @@ public class GameWindow extends JFrame {
     private InventoryPanel inventoryPanel;
     private ShopPanel shopPanel;
     private JPanel mainContainer;
-    private JPanel rightPanel;  // 오른쪽에 두 패널을 배치할 새로운 JPanel
+    private JPanel rightPanel;
     private boolean isInventoryVisible = false;
     private boolean isShopVisible = false;
 
@@ -35,93 +35,99 @@ public class GameWindow extends JFrame {
     private static final int CUSTOMER_TARGET_Y = 300;
     private Random random = new Random();
 
-    private Timer customerSpawnTimer; //고객 스폰 타이머
-    private boolean isCustomerPresent = false; //현재 고객이 있는지 여부
+    private Timer customerSpawnTimer;
+    private boolean isCustomerPresent = false;
     private int customerCount = 0;
 
     public GameWindow() {
         setTitle("Farming Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
+
+        // Initialize main container with BorderLayout
         mainContainer = new JPanel(new BorderLayout());
-        
         customers = new ArrayList<>();
-        
         player = new Player(20);
         playerRenderer = new PlayerRenderer(50, 50);
         farm = new Farm();
+
+        // Command registry setup
         CommandRegistry registry = new CommandRegistry(player, farm);
         registry.registerDefaults();
-    
         gamePanel = new GamePanel(playerRenderer, player, farm, registry, customers);
         gamePanel.setGameWindow(this);
         mainContainer.add(gamePanel, BorderLayout.CENTER);
-    
+
+        // Initialize inventory and shop panels
         inventoryPanel = new InventoryPanel(player, gamePanel);
-        inventoryPanel.setPreferredSize(new Dimension(300, 600));  // 고정된 높이 설정
+        inventoryPanel.setPreferredSize(new Dimension(300, 600));
         inventoryPanel.setVisible(false);
         mainContainer.add(inventoryPanel, BorderLayout.EAST);
-
         shopPanel = new ShopPanel(player, gamePanel);  // ShopPanel 생성
-        shopPanel.setPreferredSize(new Dimension(300, 600));  // 샵 크기 설정
+        shopPanel.setPreferredSize(new Dimension(300, 600));
         shopPanel.setVisible(false);
-// 오른쪽 패널을 생성하고, BoxLayout을 사용하여 두 패널을 세로로 배치
+
+        // Create a new right panel to hold both Inventory and Shop panels vertically
         rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.add(inventoryPanel);
         rightPanel.add(shopPanel);
-
-
-        mainContainer.add(rightPanel, BorderLayout.EAST);  // 샵 패널 추가
-
+        mainContainer.add(rightPanel, BorderLayout.EAST);
         setContentPane(mainContainer);
-        
+
+        // Set up timers and key listener
         setupTimers();
         setupKeyListener();
-        
         setSize(800, 600);
         setLocationRelativeTo(null);
     }
-
+    /**
+     * Updates the inventory display if it is visible.
+     */
     public void updateInventoryIfNeeded() {
         if (isInventoryVisible && inventoryPanel != null) {
             inventoryPanel.updateInventory(player.getInventory());
             inventoryPanel.repaint();
         }
     }
-    
+
+    /**
+     * Toggles the visibility of the inventory panel and adjusts the window size accordingly.
+     */
     private void toggleInventory() {
         isInventoryVisible = !isInventoryVisible;
         inventoryPanel.setVisible(isInventoryVisible);
+
+        // Adjust window size based on inventory visibility
         if (isInventoryVisible) {
-            setSize(1100, 600);  // 인벤토리가 보일 때 크기
-            updateInventoryIfNeeded();  // 인벤토리 상태 업데이트
+            setSize(1100, 600);  // Resize when inventory is shown
+            updateInventoryIfNeeded(); // Update inventory display
         } else {
-            setSize(800, 600);  // 인벤토리가 숨겨질 때 크기
+            setSize(800, 600);  // Reset size when inventory is hidden
         }
-        // shopPanel이 보이고 있다면 이를 숨깁니다.
+        // Hide shop if visible
         if (shopPanel.isVisible()) {
             shopPanel.setVisible(false);
         }
         gamePanel.requestFocus();
     }
+
+    /**
+     * Toggles the visibility of the shop panel and adjusts the window size accordingly.
+     */
     private void toggleShop() {
-        // ShopPanel 토글
         if (shopPanel != null) {
             isShopVisible = !isShopVisible;
-            shopPanel.setVisible(isShopVisible);  // 패널의 가시성을 변경
+            shopPanel.setVisible(isShopVisible);
 
-            // 창 크기 조정
             if (isShopVisible) {
                 setSize(1100, 600);  // 샵이 보일 때 크기
             } else {
                 setSize(800, 600);  // 샵이 숨겨질 때 크기
             }
-            // inventoryPanel이 보이고 있다면 이를 숨깁니다.
             if (inventoryPanel.isVisible()) {
                 inventoryPanel.setVisible(false);
             }
-            // 레이아웃 갱신 및 패널 그리기
             mainContainer.revalidate();
             mainContainer.repaint();
         }
@@ -130,16 +136,14 @@ public class GameWindow extends JFrame {
 
 
     private void setupTimers() {
-        // 게임 타이머
         Timer gameTimer = new Timer(16, e -> {
             updatePlayerMovement();
             playerRenderer.update();
-            updateCustomers();  // customers update 추가
+            updateCustomers();
             gamePanel.repaint();
         });
         gameTimer.start();
 
-        // 고객 스폰 타이머
         customerSpawnTimer = new Timer(10000, e -> {
             if (!isCustomerPresent && customerCount < 3) {
                 spawnNewCustomer();
@@ -149,21 +153,19 @@ public class GameWindow extends JFrame {
     }
 
     private void setupKeyListener() {
-        // keyState 배열 초기화
         keyState = new boolean[256];
-        
         gamePanel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 keyState[e.getKeyCode()] = true;
-                
-                // I 키 처리
+
+                // I key
                 if (e.getKeyCode() == KeyEvent.VK_I) {
                     toggleInventory();
                 }
-                // O 키 처리
+                // O key
                 if (e.getKeyCode() == KeyEvent.VK_O) {
-                    toggleShop();  // O 키로 샵 토글
+                    toggleShop();
                 }
             }
             
@@ -172,8 +174,8 @@ public class GameWindow extends JFrame {
                 keyState[e.getKeyCode()] = false;
             }
         });
-    
-        // gamePanel에 초기 포커스 설정
+
+        // Set initial focus to game panel
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
     }
@@ -183,7 +185,7 @@ public class GameWindow extends JFrame {
             Customer customer = customers.get(i);
             customer.update();
 
-            //고객이 maxWaitingTime을 초과하면 돌아간다.
+            // If a customer has waited too long, remove them
             if (customer.isWaitingTooLong()){
                 customers.remove(i);
                 System.out.println("A customer has left due to waiting too long.");
@@ -192,7 +194,7 @@ public class GameWindow extends JFrame {
                 startCustomerCooldown();
             }
 
-            //고객이 주문을 완료했을 때
+            // If the customer completed their order
             if (customer.isOrderComplete()){
                 customers.remove(i);
                 customerCount++;
@@ -203,20 +205,15 @@ public class GameWindow extends JFrame {
             }
         }
 
-        // 게임 안내: 완료한 고객 수가 3명이 되면 안내
+        // Notify when 3 customers have been served
         if (customerCount>=3) {
             System.out.println("3 customers served.");
 
         }
     }
     public void removeCustomer(Customer customer) {
-        // 고객 리스트에서 제거
         customers.remove(customer);
-
-        // 새로운 고객 생성
         spawnNewCustomer();
-
-        // 화면 갱신
         repaint();
     }
 
@@ -230,10 +227,11 @@ public class GameWindow extends JFrame {
         cooldownTimer.start();
     }
 
+    /**
+     * Spawns a new customer at a random X position and moves them down to the target Y position.
+     */
     private void spawnNewCustomer() {
-        int spawnX = random.nextInt(180) + 70; // 고객의 X 좌표 (100 ~ 700 사이)
-
-        // NormalCustomer 생성
+        int spawnX = random.nextInt(180) + 70;
         NormalCustomer newCustomer = new NormalCustomer(spawnX, CUSTOMER_SPAWN_Y) {
             private double currentY = CUSTOMER_SPAWN_Y;
             private static final double MOVE_SPEED = 2.0;
@@ -257,40 +255,35 @@ public class GameWindow extends JFrame {
                     spawnTime = System.currentTimeMillis(); // 손님 등장 시간 기록
                 }
             }
-            // 손님 너무 오래 기다리면 돌아감
             @Override
             public boolean isWaitingTooLong() {
                 return System.currentTimeMillis() - spawnTime > maxWaitingTime;
             }
-
             @Override
             public boolean isOrderComplete() {
-                // 주문 완료 시 true 반환 (주문 완료 조건 구현)
                 return false;
             }
         };
 
-        // 초기화 중 3개의 레시피 할당
         RecipeManager recipeManager = RecipeManager.getInstance();
         List<Recipe> recipes = recipeManager.getRandomRecipes(3); // 랜덤으로 3개 선택
-        newCustomer.assignRecipes(recipes); // 고객에게 레시피 할당
-
-        // 고객을 리스트에 추가
+        newCustomer.assignRecipes(recipes);
         customers.add(newCustomer);
         isCustomerPresent = true;
         System.out.println("New customer added at position: " + spawnX + ", " + CUSTOMER_SPAWN_Y);  // 디버깅용
     }
-
-
+    /**
+     * Updates the player's movement based on key input.
+     */
     private void updatePlayerMovement() {
         int dx = 0;
         int dy = 0;
-        
         if (keyState[KeyEvent.VK_A]) dx -= 1;
         if (keyState[KeyEvent.VK_D]) dx += 1;
         if (keyState[KeyEvent.VK_W]) dy -= 1;
         if (keyState[KeyEvent.VK_S]) dy += 1;
-        
+
+        // Move the player if they're not already moving to a target
         if (!playerRenderer.isMovingToTarget() && (dx != 0 || dy != 0)) {
             playerRenderer.move(dx, dy);
         }

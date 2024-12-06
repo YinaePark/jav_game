@@ -2,22 +2,24 @@ package command;
 
 import domain.Farm;
 import domain.item.HarvestItem;
-import domain.player.Player;
+import domain.Player;
 import game.tile.FarmTile;
 import game.ui.GamePanel;
 import game.entity.PlayerRenderer;
-
 import javax.swing.JOptionPane; // JOptionPane 추가
 import java.util.Random;
 
+/**
+ * Command to handle harvesting crops from the farm.
+ */
 public class HarvestCommand implements Command {
     private Player player;
     private Farm farm;
     private FarmTile[][] tiles;
     private PlayerRenderer playerRenderer;
     private GamePanel gamePanel;
-    private static final int TILE_SIZE = 40; // GamePanel과 동일한 값 사용
-    private Random random = new Random(); // 확률 처리를 위한 Random 객체
+    private static final int TILE_SIZE = 40; // Tile size is same as GamePanel TILE_SIZE
+    private Random random = new Random();
 
     public HarvestCommand(Player player, Farm farm, FarmTile[][] tiles, PlayerRenderer playerRenderer, GamePanel gamePanel) {
         this.player = player;
@@ -27,6 +29,9 @@ public class HarvestCommand implements Command {
         this.gamePanel = gamePanel;
     }
 
+    /**
+     * Checks if a tile is within interaction range of the player.
+     */
     private boolean isInteractable(int tileX, int tileY) {
         int playerCenterX = playerRenderer.getX() + (playerRenderer.getSize() / 2);
         int playerCenterY = playerRenderer.getY() + (playerRenderer.getSize() / 2);
@@ -38,74 +43,87 @@ public class HarvestCommand implements Command {
                 Math.abs(tileY - playerTileY) <= 1;
     }
 
-    @Override
-    public void execute(String[] args) {
-        boolean harvestedAnything = false;
-        int prob = 1;
-        StringBuilder harvestResult = new StringBuilder(); // 결과를 모을 StringBuilder
+@Override
+public void execute(String[] args) {
+    boolean harvestedAnything = false;
+    StringBuilder harvestResult = new StringBuilder();
 
-        // 모든 타일을 확인
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                FarmTile tile = tiles[i][j];
-
-                // 타일이 상호작용 가능한 범위 내에 있고, 작물이 있으며, 수확 가능한 상태인지 확인
-                if (isInteractable(i, j) && tile.hasCrop() && tile.getCrop().isReadyToHarvest()) {
-                    HarvestItem crop = tile.getCrop();
-
-                    // 확률에 따라 수확 처리
-                    double chance = random.nextDouble();
-
-                    // 50% 확률로 실패 (chance < 0.5)
-                    if (chance < 0.5) {
-                        harvestResult.append(crop.getName()).append(" harvest failed.\n");
-                        // 수확 실패 시 타일 초기화
-                        tile.setCrop(null);
-                        continue; // 수확 실패
-                    }
-
-                    // 확률에 따른 배수 처리
-                    if (chance < 0.7) {
-                        prob = 1;
-                    } else if (chance < 0.8) {
-                        prob = 2;
-                    } else if (chance < 1.0) {
-                        prob = 3;
-                    }
-
-                    // 플레이어 인벤토리에 추가 시도
-                    if (player.harvestCrop(crop)) {
-                        for (int k = 1; k < prob; k++) {
-                            player.harvestCrop(crop);
-                        }
-
-                        harvestResult.append(prob).append(" ").append(crop.getName())
-                                .append(" are harvested!!\n");
-
-                        // 수확 성공 시 타일 초기화
-                        tile.setCrop(null);
-                        // 농장에서도 작물 제거
-                        farm.harvestCrop(crop.getName());
-
-                        harvestResult.append(crop.getName()).append(" has been harvested and added to your inventory.\n");
-                        harvestedAnything = true;
-                    } else {
-                        harvestResult.append("Inventory is full! Cannot harvest ").append(crop.getName()).append("\n");
-                    }
+    // Check all tiles
+    for (int i = 0; i < tiles.length; i++) {
+        for (int j = 0; j < tiles[i].length; j++) {
+            if (isInteractable(i, j)) {
+                String result = processTile(tiles[i][j]);
+                if (!result.isEmpty()) {
+                    harvestResult.append(result);
+                    harvestedAnything = true;
                 }
             }
         }
+    }
 
-        if (!harvestedAnything) {
-            harvestResult.append("No crops are ready to harvest in range.\n");
+    if (!harvestedAnything) {
+        harvestResult.append("No crops are ready to harvest in range.\n");
+    }
+
+    JOptionPane.showMessageDialog(null, harvestResult.toString());
+
+    if (harvestedAnything && gamePanel != null) {
+        gamePanel.updateInventoryIfVisible();
+    }
+}
+
+    /**
+     * Processes a single tile for harvesting.
+     *
+     * @param tile The tile to process.
+     * @return A string message describing the harvest result, or an empty string if no action occurred.
+     */
+    private String processTile(FarmTile tile) {
+        // no crop to harvest
+        if (!tile.hasCrop() || !tile.getCrop().isReadyToHarvest()) {
+            return "";
         }
+        HarvestItem crop = tile.getCrop();
+        double chance = random.nextDouble();
 
-        // 결과를 모달 창으로 표시
-        JOptionPane.showMessageDialog(null, harvestResult.toString());
+        // Check harvest success
+        if (chance < 0.5) {
+            tile.setCrop(null);
+            farm.harvestCrop(crop.getName());
+            return crop.getName() + " harvest failed.\n";
+        }
+        // Calculate crop yield
+        int cropYield = calculateYield(chance);
 
-        // 인벤토리가 표시되면 업데이트
-        if (harvestedAnything && gamePanel != null) {
-            gamePanel.updateInventoryIfVisible();
+        // Add crop to player's inventory
+        if (player.harvestCrop(crop)) {
+            for (int i = 1; i < cropYield; i++) {
+                player.harvestCrop(crop); // additional harvest
+            }
+            // Clear tile and update farm
+            tile.setCrop(null);
+            farm.harvestCrop(crop.getName());
+
+            return cropYield + " " + crop.getName() + " are harvested and added to inventory.\n";
+        } else {
+            return "Inventory is full! Cannot harvest " + crop.getName() + "\n";
         }
     }
+
+    /**
+     * Calculates the crop yield based on a random chance.
+     *
+     * @param chance The random chance value.
+     * @return The number of crops yielded.
+     */
+    private int calculateYield(double chance) {
+        if (chance < 0.7) {
+            return 1;
+        } else if (chance < 0.8) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
 }

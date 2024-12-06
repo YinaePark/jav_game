@@ -2,7 +2,7 @@ package game.ui;
 
 import domain.item.Item;
 import domain.item.ShopItemManager;
-import domain.player.Player;
+import domain.Player;
 
 import javax.swing.*;
 import java.awt.*;

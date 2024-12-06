@@ -13,7 +13,7 @@ public class FarmCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        // 심어진 농작물 목록 가져오기
+        // get planted crops list in the farm
         if (farm.getCrops().isEmpty()) {
             System.out.println("No crops have been planted yet.");
         } else {
