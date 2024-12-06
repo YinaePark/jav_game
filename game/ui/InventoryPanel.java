@@ -122,7 +122,9 @@ public class InventoryPanel extends JPanel {
             }
         }
     }
-
+    public void setSelectedItem(Item item) {
+        this.selectedItem = item;
+    }
     public Item getSelectedItem() {
         return selectedItem;
     }
