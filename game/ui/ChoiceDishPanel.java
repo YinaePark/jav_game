@@ -14,7 +14,6 @@ public class ChoiceDishPanel extends JPanel {
     private List<Recipe> recipes;
     private Consumer<String> onDishSelected;
 
-
     public ChoiceDishPanel(List<Recipe> recipes, Consumer<String> onDishSelected) {
         this.recipes = recipes;
         this.onDishSelected = onDishSelected;
