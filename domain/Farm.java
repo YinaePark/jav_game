@@ -65,6 +65,7 @@ public class Farm {
         return plotCount - crops.size();
     }
 
+
     // 현재 농작물 목록 반환
     public List<HarvestItem> getCrops() {
         return crops;

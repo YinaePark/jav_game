@@ -18,19 +18,19 @@ public class IngredientSelectionPanel extends JDialog {
     private JPanel ingredientSlotsPanel;
     private ActionListener submitListener;
     private NormalCustomer normalCustomer;
+    private GamePanel gamePanel;
 
-    public IngredientSelectionPanel(Frame owner, Player player, NormalCustomer normalCustomer) {
-        super(owner, "Select Ingredients", true);  // Modal로 띄운다.
+    public IngredientSelectionPanel(Frame owner, Player player, NormalCustomer normalCustomer, GamePanel gamePanel) {
+        super(owner, "Select Ingredients", true);
         this.player = player;
         this.normalCustomer = normalCustomer;
+        this.gamePanel = gamePanel;  // GamePanel 저장
         this.selectedIngredients = new Item[MAX_INGREDIENTS];
         initialize();
     }
 
     private void onSubmitButtonClicked() {
-        // NormalCustomer에서 사용될 플레이어 객체와 선택된 재료들을 전달
         if (player != null && selectedIngredients != null) {
-            // Customer 객체를 생성하고, 만족도를 계산
             List<String> selectedIngredientNames = new ArrayList<>();
             for (Item ingredient : selectedIngredients) {
                 if (ingredient != null) {
@@ -49,6 +49,7 @@ public class IngredientSelectionPanel extends JDialog {
 
             // 결과 메시지 표시
             JOptionPane.showMessageDialog(this, "You have earned " + reward + " euros!");
+            gamePanel.removeCustomer(normalCustomer);
         }
 
         // 대화 상자 닫기

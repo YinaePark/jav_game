@@ -416,17 +416,6 @@ public class GamePanel extends JPanel {
         dialog.setVisible(true);
     }
 
-    // 플레이어의 인벤토리에서 사용할 수 있는 재료를 가져오는 메서드
-    private List<String> getPlayerIngredients() {
-        List<String> playerIngredients = new ArrayList<>();
-        // 플레이어의 인벤토리에서 재료 목록을 추가
-        for (Item item : player.getInventory()) {
-            playerIngredients.add(item.getName());
-
-        }
-        return playerIngredients;
-    }
-
 
     private void serveDishToCustomer(String selectedDish, Customer customer) {
         // 선택한 레시피에 대해 재료 선택 다이얼로그 띄우기
@@ -442,11 +431,16 @@ public class GamePanel extends JPanel {
 
     private void showIngredientSelectionDialog(Recipe selectedDish, Customer customer) {
         // IngredientSelectionDialog 생성 (Player와 연결)
-        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(gameWindow, player, (NormalCustomer) customer);
+        IngredientSelectionPanel ingredientSelectionPanel = new IngredientSelectionPanel(gameWindow, player, (NormalCustomer) customer, this);
 
         // 다이얼로그 표시
         ingredientSelectionPanel.setVisible(true);
 
+
+    }
+    public void removeCustomer(Customer customer) {
+        customers.remove(customer);
+        repaint();  // 고객을 제거한 후 화면을 갱신
     }
 
 
